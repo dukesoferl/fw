@@ -1,3 +1,6 @@
+Version 0.1.36
+  * move svn into fw base (here), so that fw can bootstrap from google code
+
 Version 0.1.35
   * faster cvs add
 
