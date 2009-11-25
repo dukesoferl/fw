@@ -11,6 +11,7 @@ AC_CONFIG_FILES([fw/Makefile
                  fw/revision/Makefile
                  fw/revision/none/Makefile
                  fw/revision/see-vee-ess/Makefile
+                 fw/revision/svn/Makefile
                  fw/sh/Makefile
                  fw/template/Makefile
                  fw/template/fw-build/Makefile

@@ -6,7 +6,8 @@ check_SCRIPTS = 			\
   test-template-fw-build		\
   test-template-fw-template		\
   test-template-script			\
-  test-cvs
+  test-cvs				\
+  test-svn
 
 TESTS = $(check_SCRIPTS)
 
@@ -14,7 +15,8 @@ CLEANFILES += 				\
   test-template-fw-build.out		\
   test-template-fw-template.out		\
   test-template-script.out		\
-  test-cvs.out
+  test-cvs.out				\
+  test-svn.out
 
 MAINTAINERCLEANFILES += 		\
   share					\

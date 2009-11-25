@@ -1,4 +1,4 @@
-SUBDIRS = none see-vee-ess
+SUBDIRS = none see-vee-ess svn
 
 MAINTAINERCLEANFILES = Makefile.in
 
