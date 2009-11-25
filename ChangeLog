@@ -1,4 +1,5 @@
-Version 0.1.37 (NYR)
+Version 0.1.37 
+  * re-release, tag directory was wrong
 
 Version 0.1.36
   * move svn into fw base (here), so that fw can bootstrap from google code

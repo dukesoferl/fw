@@ -25,4 +25,4 @@ FW_PACKAGE_BUILD_CONFLICTS=""
 
 FW_DUPLOAD_ARGS=${FW_DUPLOAD_ARGS-"-t dukeshardy"}
 
-FW_SUBVERSION_TAG_ROOT="https://fwtemplates.googlecode.com/svn/tags/lyet"
+FW_SUBVERSION_TAG_ROOT="https://fwtemplates.googlecode.com/svn/tags/fw"
