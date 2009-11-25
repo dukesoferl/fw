@@ -24,3 +24,5 @@ FW_PACKAGE_BUILD_DEPENDS="automaken, autoconf2.5 [darwin-i386], autoconf [!darwi
 FW_PACKAGE_BUILD_CONFLICTS=""
 
 FW_DUPLOAD_ARGS=${FW_DUPLOAD_ARGS-"-t dukes"}
+
+FW_SUBVERSION_TAG_ROOT="https://fwtemplates.googlecode.com/svn/tags/lyet"
