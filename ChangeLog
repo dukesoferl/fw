@@ -1,0 +1,133 @@
+Version 0.1.35
+  * faster cvs add
+
+Version 0.1.34:
+  * loosen autoconf dep
+
+Version 0.1.33:
+  * define compare_versions for hooks
+
+Version 0.1.32:
+  * bugfix INSTALLED support
+
+Version 0.1.31:
+  * support INSTALLED computed version in package specifications
+
+Version 0.1.30:
+  * add optional hook for revision control to modify fw-pkgin
+
+Version 0.1.29:
+  * don't self-include with auto-dependencies
+
+Version 0.1.28:
+  * more shell support in check-shell.am
+
+Version 0.1.27:
+  * switch to dukesoferl package archive
+
+Version 0.1.26:
+  * build argument to create-package
+  * check-script-python-% target
+  * make-dist build hook (and optionally, template hook)
+  * follow debian version number spec (http://www.debian.org/doc/debian-policy/ch-controlfields.html)
+
+Version 0.1.25:
+  * package/deb: don't release packages with TEST dependencies
+
+Version 0.1.24:
+  * fakeroot support for package/deb
+
+Version 0.1.23: 
+  * default script templates to architecture independent
+  * @FW_BUILD_AUTOMAKE_CREATE_PACKAGE_EXTRA_ARGS@, useful for templates to add args to the package build process
+
+Version 0.1.22:
+  * handle use of env in shell line 
+  * actually error out if check shell fails
+
+Version 0.1.21:
+  * minor tweaks and fixes to package/deb, as prep for fw-template-package
+
+Version 0.1.20:
+  * add canonical versions to hooks
+
+Version 0.1.19:
+  * fixes for fw/ directory replication in make dist
+
+Version 0.1.18:
+  * abstraction for constructing package hooks
+
+Version 0.1.17:
+  * pass libexecdir to create-package 
+  * FW_PACKAGE_SUGGESTS
+  * get hooks from destdir not srcdir
+
+Version 0.1.16:
+  * allow space between opening parenthesis and operator in version spec
+  * set tar-ustar option
+
+Version 0.1.15:
+  * oops, forgot changelog, wtf (?)
+
+Version 0.1.14:
+  * add EXTRA_DIST initializer to Makefile_dot_am's
+  * detect gmake in test-template.in
+  * consistent use of backticks
+
+Version 0.1.13:
+  * fix make dist for templates
+
+Version 0.1.12:
+  * bootstrap fixes
+  * fix make check on freebsd7
+  * fix source-install to detect gmake
+  * script template make dist fixes
+  * fix make dist (include fw.local)
+  * don't call dependency-range on empty depends in package/deb/make-package
+  * make install fixes
+
+Version 0.1.11:
+  * ignore-files on NAME in fw-template
+  * parse improvement in revision/cvs/remove-files
+
+Version 0.1.10:
+  * make fw-template projects architecture independent by default
+  * don't add framewerk dep if already there in fw-template
+
+Version 0.1.9:
+  * don't mangle dependencies when adding implied ranges
+
+Version 0.1.8:
+  * have build/automake/load-config generate a build dep on framewerk
+  * have fw/template/fw-template/load-config generate a dep on framewerk
+
+Version 0.1.7:
+  * fix bug re: enforcing range dependencies in build deps
+  * introduce automatic range dependencies if otherwise unspecified
+
+Version 0.1.6:
+  * export FW_PACKAGE_TYPE in fw-package for subprocesses to know package type
+  * fix build/automake/load-config (and all others!) for newlines in variables
+
+Version 0.1.5:
+  * fix fw-template revision control error (commit NAME not "$template_type")
+
+Version 0.1.4:
+  * More make dist fixes (generated bootstrap, create-package)
+
+Version 0.1.3:
+  * Allow --foo=bar arguments in parse-args.sh
+
+Version 0.1.2:
+  * Fix make dist so that framewerk is not required to build.
+
+Version 0.1.1:
+  * Add dependencies
+
+Version 0.1.0:
+  * Added FW_DUPLOAD_ARGS variable for configuring dupload behaviour
+  * Change default prefix to /usr
+  * Support FW_PACKAGE_REPLACES 
+
+Version 0.0.0:
+  * Initial revision.

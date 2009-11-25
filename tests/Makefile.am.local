@@ -1,0 +1,29 @@
+# put whatever (auto)make commands here, they will be included from Makefile.am
+
+check_SCRIPTS = 			\
+  test-canonicalize-package		\
+  test-canonicalize-version		\
+  test-template-fw-build		\
+  test-template-fw-template		\
+  test-template-script			\
+  test-cvs
+
+TESTS = $(check_SCRIPTS)
+
+CLEANFILES += 				\
+  test-template-fw-build.out		\
+  test-template-fw-template.out		\
+  test-template-script.out		\
+  test-cvs.out
+
+MAINTAINERCLEANFILES += 		\
+  share					\
+  test-template-fw-build		\
+  test-template-fw-template		\
+  test-template-script
+
+maintainer-clean-local:
+	rm -rf tmp
+
+EXTRA_DIST +=				\
+  $(check_SCRIPTS)

@@ -1,0 +1,11 @@
+# put whatever (auto)make commands here, they will be included from Makefile.am
+
+dist_bin_SCRIPTS =			\
+  fw-bootstrap				\
+  fw-exec				\
+  fw-package
+
+bin_SCRIPTS = 				\
+  fw-init
+
+CLEANFILES += fw-init

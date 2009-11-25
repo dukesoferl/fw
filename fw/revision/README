@@ -1,0 +1,4 @@
+see-vee-ess should actually be cvs, but then case insensitive file systems
+break because of the CVS directory.
+
+so it is renamed to cvs on install.

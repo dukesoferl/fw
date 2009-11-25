@@ -1,0 +1,16 @@
+#! /bin/sh
+
+test -z "${FW_TRACE}" || set -x
+
+test -f CVS/Entries || exit 1
+
+files=`
+for x in "$@"
+  do
+    if test -f "$x"
+      then
+        egrep "^/$x/" CVS/Entries >/dev/null 2>/dev/null || printf '"%s" ' "$x"
+      fi
+  done`
+
+test -z "$files" || eval cvs -Q add $files

@@ -1,0 +1,26 @@
+#! /bin/sh
+
+(
+cd ..
+set -e
+
+# If it (epoch) is omitted then the upstream_version may not contain any colons.
+test `fw-exec package/deb/canonicalize-version 1flass:turg` = 1flass.turg
+test `fw-exec package/deb/canonicalize-version 0:1flass:turg` = 0:1flass:turg
+
+# if it (debian revision) isn't present then the upstream_version may not contain a hyphen. 
+test `fw-exec package/deb/canonicalize-version 1flass:turg-*xx` = 1flass.turg..xx
+test `fw-exec package/deb/canonicalize-version 1flass:turg-xxx` = 1flass.turg-xxx
+test `fw-exec package/deb/canonicalize-version 0:1flass:turg-*xx` = 0:1flass:turg..xx
+test `fw-exec package/deb/canonicalize-version 0:1flass:turg-xxx` = 0:1flass:turg-xxx
+
+# The upstream_version may contain only alphanumerics[32] and the characters . + - : ~ (full stop, plus, hyphen, colon, tilde) ...
+
+test `fw-exec package/deb/canonicalize-version 1flass*` = 1flass. 
+
+set +e
+echo " ****** following errors are expected ****** "
+# The upstream_version ... should start with a digit.
+fw-exec package/deb/canonicalize-version flass:turg && exit 1
+set -e
+) > test-canonicalize-version.out 2>&1

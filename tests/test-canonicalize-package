@@ -1,0 +1,13 @@
+#! /bin/sh
+
+(
+set -e
+cd ..
+test `fw-exec package/deb/canonicalize-package flass` = flass
+test `fw-exec package/deb/canonicalize-package fla~:ss` = fla..ss
+set +e
+echo " ****** following errors are expected ****** "
+fw-exec package/deb/canonicalize-package f && exit 1
+fw-exec package/deb/canonicalize-package +f && exit 1
+set -e
+) > test-canonicalize-package.out 2>&1

@@ -1,0 +1,68 @@
+dnl -- include additional autoconf commands here
+dnl -- do not include AC_OUTPUT, this is called for you
+
+AC_CONFIG_FILES([fw/Makefile
+                 fw/build/Makefile
+                 fw/build/automake/Makefile
+                 fw/build/automake/fw-pkgin/Makefile
+                 fw/m4/Makefile
+                 fw/package/Makefile
+                 fw/package/deb/Makefile
+                 fw/revision/Makefile
+                 fw/revision/none/Makefile
+                 fw/revision/see-vee-ess/Makefile
+                 fw/sh/Makefile
+                 fw/template/Makefile
+                 fw/template/fw-build/Makefile
+                 fw/template/fw-build/fw.local/Makefile
+                 fw/template/fw-build/fw.local/build/Makefile
+                 fw/template/fw-build/fw.local/build/NAME/Makefile
+                 fw/template/fw-template/Makefile
+                 fw/template/fw-template/fw.local/Makefile
+                 fw/template/fw-template/fw.local/template/Makefile
+                 fw/template/fw-template/fw.local/template/NAME/Makefile
+                 fw/template/fw-template/tests/Makefile
+                 fw/template/script/Makefile
+                 fw/template/script/bin/Makefile
+                 fw/template/script/tests/Makefile
+                 fw.local/Makefile
+                 fw.local/build/Makefile
+                 fw.local/build/automake/Makefile
+                 fw.local/package/Makefile
+                 fw.local/package/deb/Makefile])
+
+AC_CONFIG_FILES([bin/fw-init],
+                [chmod +x bin/fw-init])
+
+AC_CONFIG_FILES([tests/test-cvs],
+                [chmod +x tests/test-cvs])
+
+AC_CONFIG_FILES([tests/test-template-fw-build],
+                [chmod +x tests/test-template-fw-build])
+
+AC_CONFIG_FILES([tests/test-template-fw-template],
+                [chmod +x tests/test-template-fw-template])
+
+AC_CONFIG_FILES([tests/test-template-script],
+                [chmod +x tests/test-template-script])
+
+AC_PATH_PROG([GMAKE], [gmake], [make])
+
+AC_MSG_CHECKING([whether '$GMAKE' is gnu make])
+cat <<EOD > testmak.$$
+.BEGIN:
+	@exit 1
+
+nop:
+	echo "" >/dev/null 2>/dev/null
+EOD
+$GMAKE -f testmak.$$ nop >/dev/null 2>/dev/null
+rv=$?
+rm -f testmak.$$
+if test $rv = 0
+  then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([can't find gnu make])
+  fi

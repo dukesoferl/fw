@@ -1,0 +1,31 @@
+FEATURE: support refering to installed version in a dependency specification
+audit: parsing routines assume fw-pkgin/config vars have quotes around their values
+SOFT BUILD
+add upper bound in generated range dependency
+BUG: test-template.in that's installed with fw-template doesn't change build deps so can't pass unless already installed
+BUG: stick share/fw dir (as share/) into fw/ when make dist
+BUG: --name=value becomes name=value= in parse-args.sh
+BUG: need dep on build-essential (or something: make wasn't installed)
+BUG: build conflicts ignored during dependency check
+FEATURE: revision control plug-ins should have a 'load-config' hook
+BUG: fw-package: error: creating tag '--fw_version' failed
+use CVS/Entries documentation to avoid network calls (http://durak.org/cvswebsites/doc/cvs_19.php)
+move automatic dependency detection into templates (ldd strategy is C specific)
+bootstrap fails if automake or autoconf is too old of a version, but this is not detected nicely
+check-shell doesn't work: make touches the file even if there is a syntax error
+fw-template: should create m4 file with FW_TEMPLATE_FOO in it 
+build packages' arch dependency orthogonal to actual package (by default same?)
+enforce version ranges in check-build-dependencies
+rename check-shell to check-scripts
+fw-test: fw-find = fw-test -f
+fw-init.in actually references build/automake/fw-pkgin
+build-ac-init take argument the typical way
+fatal only prints message for topmost invocation
+ignore files of create-package is messed up
+utility shell functions that it easy to write init's:
+  * init a required file w/perms
+  * init an optional file w/perms
+
+build packages are including darwin, should restrict arch (?)
+
+fw-template: should automatically make dep on framewerk in fw-pkgin/config

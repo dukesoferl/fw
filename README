@@ -1,0 +1,9 @@
+Framewerk is an build environment.  It aims for repeatability
+and extensibility.  Repeatable means that the exact conditions and
+business processes under which a piece of software is released can
+be recreated.  Extensibility means that business processes regarding
+development are packaged and versioned, and modifications take effect
+on all projects without requiring those projects to be modified.
+In addition, framewerk abstracts around differences such as packaging
+format and revision control, easily allowing organizations to experiment
+with new development technologies.

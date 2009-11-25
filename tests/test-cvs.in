@@ -1,0 +1,44 @@
+#! /bin/sh
+
+(
+set -x
+rm -rf tmp
+rm -rf cvstmp
+mkdir cvstmp
+( 
+  cd cvstmp &&
+  cvs -d `pwd` init
+)
+test -h share || ln -sf .. share || exit 1
+rm -rf tmp 
+PATH="`pwd`/../bin:$PATH"
+export PATH
+FW_ROOT=`pwd`
+export FW_ROOT
+CVSROOT="`pwd`/cvstmp"
+export CVSROOT
+rm -rf megatmp
+(
+  mkdir megatmp &&
+  cd megatmp &&
+  fw-init --name tmp                                    \
+          --revision see-vee-ess                        \
+          --template script &&                          \
+  mv -f tmp .. &&                                       \
+  cd .. &&                                              \
+  rmdir megatmp                                         \
+) || exit 1
+cd tmp
+( cvs -n -q up | grep '^?' ) && exit 1
+./bootstrap || exit 1
+./build || exit 1
+"@GMAKE@" -s check || exit 1
+( cvs -n -q up | grep '^?' ) && exit 1
+"@GMAKE@" -s maintainer-clean
+( cvs -n -q up | grep '^?' ) && exit 1
+test -z "`find . -name '*.am'`" || exit 1
+) > test-cvs.out 2>&1 || exit 1
+
+rm -rf tmp || exit 1
+rm share || exit 1
+rm -rf cvstmp || exit 1

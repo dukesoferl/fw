@@ -1,0 +1,6 @@
+#! /bin/sh
+
+PATH="`pwd`/bin:$PATH"
+export PATH
+
+"`pwd`/bin/fw-bootstrap" --fw_version 0.0.0 --name fw --template script --revision none "$@"
