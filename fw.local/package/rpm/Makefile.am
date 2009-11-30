@@ -1,4 +1,4 @@
-SUBDIRS = deb rpm
+EXTRA_DIST = detect
 
 MAINTAINERCLEANFILES = \
   Makefile.in

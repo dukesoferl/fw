@@ -30,7 +30,8 @@ AC_CONFIG_FILES([fw/Makefile
                  fw.local/build/Makefile
                  fw.local/build/automake/Makefile
                  fw.local/package/Makefile
-                 fw.local/package/deb/Makefile])
+                 fw.local/package/deb/Makefile
+                 fw.local/package/rpm/Makefile])
 
 AC_CONFIG_FILES([bin/fw-init],
                 [chmod +x bin/fw-init])
