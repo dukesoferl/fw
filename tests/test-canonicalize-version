@@ -3,6 +3,8 @@
 (
 cd ..
 set -e
+PATH="`pwd`/bin:$PATH"
+export PATH
 
 # If it (epoch) is omitted then the upstream_version may not contain any colons.
 test `fw-exec package/deb/canonicalize-version 1flass:turg` = 1flass.turg

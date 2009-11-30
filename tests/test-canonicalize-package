@@ -3,6 +3,8 @@
 (
 set -e
 cd ..
+PATH="`pwd`/bin:$PATH"
+export PATH
 test `fw-exec package/deb/canonicalize-package flass` = flass
 test `fw-exec package/deb/canonicalize-package fla~:ss` = fla..ss
 set +e
