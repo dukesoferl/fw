@@ -1,5 +1,5 @@
 Version 0.1.37 [ NYR ]
-  * fix test-canonicalize-package and test-canonicalize-version PATH
+  * fix test-canonicalize-package, test-canonicalize-version, test-svn PATH
 
 Version 0.1.36
   * move svn into fw base (here), so that fw can bootstrap from google code
