@@ -8,6 +8,7 @@ AC_CONFIG_FILES([fw/Makefile
                  fw/m4/Makefile
                  fw/package/Makefile
                  fw/package/deb/Makefile
+                 fw/package/rpm/Makefile
                  fw/revision/Makefile
                  fw/revision/none/Makefile
                  fw/revision/see-vee-ess/Makefile

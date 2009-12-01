@@ -1,4 +1,4 @@
-SUBDIRS = deb
+SUBDIRS = deb rpm
 
 fwpackagedir = $(prefix)/share/fw/package/
 
