@@ -110,7 +110,7 @@ sub get_state ()
           exec "rpm",
                "-qa",
                '--queryformat',
-               '%-{name}\t%{version}\n';
+               '%-{name}\t%{version}-%{release}\n';
         }
     );
 
@@ -126,6 +126,59 @@ sub get_state ()
 
 sub get_dependencies ($$$$@)
   {
+    my ($state, undef, $arch, $release, @packages) = @_;
+
+    my %dependencies;
+    my %deps_by_package;
+
+    return () unless scalar @packages;
+
+    proctalk (
+      sub 
+        {
+          my ($readfh, $writefh) = @_;
+
+          foreach my $package (@packages)
+            {
+              print $writefh "$package\n";
+            }
+
+          $writefh->close ();
+
+          my $in_depends;
+          my $package;
+
+          while (defined ($_ = <$readfh>))
+            {
+              chomp;
+
+              my ($package, undef) = split /\s+/, $_;
+
+              # TODO: rpm -qR lists all sorts of wierd stuff ...
+              next unless $state->{$package};
+
+              scalar map { $deps_by_package{$package}->{$_} = 1;
+                           $dependencies{$_} = 1 }
+                     parse_depends ($state, $arch, $_, $release);
+            }
+        },
+      sub
+        {
+          my ($readfh, $writefh) = @_;
+
+          close STDIN;
+          open STDIN, "<&", $readfh or die "can't dup STDIN: $!";
+
+          close STDOUT;
+          open STDOUT, ">&", $writefh or die "can't dup STDOUT: $!";
+
+          close STDERR unless $ENV{"FW_TRACE"};
+
+          exec "xargs", "rpm", "-qR", "--" or die "exec failed: $!";
+        }
+    );
+
+    return (wantarray) ? keys %dependencies : \%deps_by_package;
     return undef;
   }
 
