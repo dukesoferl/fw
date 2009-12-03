@@ -1,0 +1,159 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                           chicken and egg                           
+#---------------------------------------------------------------------
+
+test -f "${FW_ROOT}/share/fw/sh/fw-find.sh" && fws="${FW_ROOT}/share/fw/sh/fw-find.sh"
+test -f "fw/sh/fw-find.sh" && fws="fw/sh/fw-find.sh"
+test -f "fw.local/sh/fw-find.sh" && fws="fw.local/sh/fw-find.sh"
+test ! -z "$fws" || {
+  echo "package/rpm/make-package: fatal: can't locate fw-find.sh" 1>&2
+  exit 1
+}
+
+. "$fws"
+
+#---------------------------------------------------------------------
+#                              routines                               
+#---------------------------------------------------------------------
+
+fw_source "package/rpm/make-package" "sh/fatal.sh"
+fw_source "package/rpm/make-package" "sh/fw-exec.sh"
+fw_source "package/rpm/make-package" "sh/parse-args.sh"
+fw_source "package/rpm/make-package" "sh/validate-args.sh"
+
+# automatic dependencies ... rpmbuild does this so skip it ...
+
+make_spec_file () \
+  {
+    local depends
+
+    depends=`fw_exec "package/rpm/dependency-range"             \
+                     "$FW_PACKAGE_DEPENDS" | perl -pe 's/[\(\)]//g;'`
+
+    test $? -eq 0 || fatal "package/rpm/make-package"
+
+    mkdir "$destdir"/_TMP || fatal "package/rpm/make-package"
+    chmod 755 "$destdir"/_TMP || fatal "package/rpm/make-package"
+
+    cat <<EOD > "$destdir"/_TMP/package.spec
+Summary: $FW_PACKAGE_SHORT_DESCRIPTION
+Name: ${package}
+Version: $version
+Release: $releasenum
+License: Unknown
+Group: Optional
+Source: file:///${package}-${version}.tar.gz
+BuildArch: $arch
+#URL:
+#Distribution:
+#Vendor:
+#Packager:
+Requires: $depends
+#Conflicts: 
+
+%description
+$FW_PACKAGE_DESCRIPTION
+
+%prep
+%setup
+
+%build
+./configure
+make
+
+%install
+make DESTDIR="$destdir"/_TMP/root install
+
+%files
+EOD
+    find "$destdir" -type f | \
+    perl -ne 'BEGIN { $l = length shift @ARGV; };
+              $s = substr ($_, $l);
+              next unless $s =~ /\S/;
+              next if $s =~ m%^/?_TMP%;
+              print $s;' "$destdir" >> "$destdir"/_TMP/package.spec
+
+    find "$destdir" -type d | \
+    perl -ne 'BEGIN { $l = length shift @ARGV; };
+              $s = substr ($_, $l);
+              next unless $s =~ /\S/;
+              next if $s =~ m%^/?_TMP%;
+              print "%dir $s";' "$destdir" >> "$destdir"/_TMP/package.spec
+  }
+
+# TODO: hooks
+# TODO: conflicts, provides
+
+#    hookdir="${libexecdir}/fw/$FW_PACKAGE_NAME-$FW_PACKAGE_VERSION"
+#
+#    for x in pre-install post-install pre-remove post-remove
+#      do
+#        target=`echo "$x" | perl -pe 's%^post-%post%;
+#                                      s%^pre-%pre%; 
+#                                      s%install%inst%;
+#                                      s%remove%rm%;'`
+#        test ! -f "${destdir}/${hookdir}/$x" ||                            \
+#        cp -f "${destdir}/${hookdir}/$x" "${destdir}/DEBIAN/${target}" ||  \
+#        fatal "package/rpm/make-package"
+#      done
+#
+#    for x in start stop
+#      do
+#        test -f "${destdir}/${hookdir}/$x" &&                           \
+#        echo "package/rpm/make-package: warning: $x hook not supported" 1>&2
+#      done
+#  }
+
+#---------------------------------------------------------------------
+#                                main                                 
+#---------------------------------------------------------------------
+
+parse_args "package/rpm/make-package" "$@"
+
+validate_args "package/rpm/make-package" "destdir libexecdir ldd outdir release template" "template"
+
+which rpm >/dev/null 2>/dev/null || {
+  echo "package/rpm/make-package: error: rpm not installed" 1>&2
+  fatal "package/rpm/make-package"
+}
+
+eval `fw_exec "template/$template/load-config"`
+
+package=`fw-exec package/rpm/canonicalize-package "${FW_PACKAGE_NAME}"` || fatal package/rpm/make-package
+version=`fw-exec package/rpm/canonicalize-version "${FW_PACKAGE_VERSION}"` || fatal package/rpm/make-package
+
+if test "$FW_PACKAGE_ARCHITECTURE_DEPENDENT" = "1"
+  then
+    arch=`rpm -q rpm --queryformat %{arch}`
+  else
+    arch="noarch"
+  fi
+
+if test "x$release" = xyes
+  then
+    releasenum="1"
+  else
+    releasenum="TEST1"
+  fi
+
+make_spec_file
+
+make -s dist
+
+mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S}
+mkdir -p "$destdir"/_TMP/root/var/tmp
+mkdir -p "$destdir"/_TMP/root/"$destdir"/_TMP
+ln -s "$destdir"/_TMP/root "$destdir"/_TMP/root/"$destdir"/_TMP/root
+(cd /usr/src/redhat; find . -print | cpio -pvd "$destdir"/_TMP/root/rpmbuild)
+cp ${package}-${version}.tar.gz "$destdir"/_TMP/root/rpmbuild/SOURCES/
+rpmbuild --root "$destdir"/_TMP/root --define "%_topdir $destdir/_TMP/root/rpmbuild" -ba "$destdir"/_TMP/package.spec
+test $? -eq 0 || fatal "package/rpm/make-package"
+
+cp -f "$destdir"/_TMP/root/rpmbuild/SRPMS/${package}-${version}-${releasenum}.src.rpm "${outdir}"
+cp -f "$destdir"/_TMP/root/rpmbuild/RPMS/$arch/${package}-${version}-${releasenum}.$arch.rpm "${outdir}"
+
+rm -rf "$destdir"/_TMP
+
+exit 0

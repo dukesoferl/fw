@@ -1,0 +1,54 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                           chicken and egg                           
+#---------------------------------------------------------------------
+
+test -f "${FW_ROOT}/share/fw/sh/fw-find.sh" && fws="${FW_ROOT}/share/fw/sh/fw-find.sh"
+test -f "fw/sh/fw-find.sh" && fws="fw/sh/fw-find.sh"
+test -f "fw.local/sh/fw-find.sh" && fws="fw.local/sh/fw-find.sh"
+test ! -z "$fws" || {
+  echo "package/rpm/make-hook: fatal: can't locate fw-find.sh" 1>&2
+  exit 1
+}
+
+. "$fws"
+
+#---------------------------------------------------------------------
+#                              routines                               
+#---------------------------------------------------------------------
+
+fw_source "package/rpm/make-hook" "sh/fatal.sh"
+fw_source "package/rpm/make-hook" "sh/fw-exec.sh"
+fw_source "package/rpm/make-hook" "sh/parse-args.sh"
+fw_source "package/rpm/make-hook" "sh/validate-args.sh"
+
+#---------------------------------------------------------------------
+#                                main                                 
+#---------------------------------------------------------------------
+
+# TODO
+
+exit 1
+
+#parse_args "package/rpm/make-hook" "$@"
+#
+#validate_args "package/rpm/make-hook" "hook" ""
+#
+#case "$hook" in
+#  post-install)
+#    make_post_install
+#    ;;
+#  post-remove)
+#    make_post_remove
+#    ;;
+#  pre-install)
+#    make_pre_install
+#    ;;
+#  pre-remove)
+#    make_pre_remove
+#    ;;
+#  *)
+#    echo "package/rpm/make-hook: warning: unsupported hook '$hook'" 1>&2
+#    exit 0
+#esac

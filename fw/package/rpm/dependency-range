@@ -15,6 +15,11 @@ use strict;
 # Parse FW_PACKAGE_DEPENDENCIES, which is in debian binary
 # dependency format.  Returns the dependencies along with 
 # implied range dependencies if otherwise unspecified.
+#
+# NB: this version is different than the version in package/deb 
+# rpm cannot handle disjunctive dependencies, so we need to pick 
+# one element of the disjunction :(
+# we will require the builder to have installed one of the choices
 #---------------------------------------------------------------------
 
 sub parse_depends_range ($$)
@@ -29,22 +34,20 @@ sub parse_depends_range ($$)
     my $firstspec = 1;
   SPEC:  foreach my $spec (split /,\s*/, $depends)
       {
-        my $firstop = 1;
         print ", " unless $firstspec;
         $firstspec = 0;
 
   OPTION: foreach my $option (split /\|\s*/, $spec)
           {
-            print " | " unless $firstop;
-            $firstop = 0;
-
             $option =~ m/^(\S+)\s*(\(\s*(<<|<|<=|=|>=|>>)\s*([^\)]+)\))?/ or
-              die "can't parse dependencies '$depends' (option '$option')";
+              die "can't parse dependencies '$depends' (option '$option')\n";
 
             my $p = $1;
             my $op = $3;
             my $rawv = defined ($4) ? $4 : "";
             my $version = ($rawv eq "INSTALLED") ? $state->{$p} : $rawv;
+
+            next OPTION unless exists $state->{$p};
 
             if (   defined ($op) && $op ne "" 
                 && defined ($version) && $version ne "")
@@ -53,25 +56,13 @@ sub parse_depends_range ($$)
               }
             else
               {
-                if ($state->{$p})
-                  {
-                    print "$p (>= $state->{$p})";
-                  }
-# TODO: what about reverse provides (?)
-#                elsif (my $rev_p = reverse_provides ($state, $p))
-#                  {
-#                    print "$p (>= $state->{$rev_p})";
-#                  }
-                elsif ($rawv eq "INSTALLED")
-                  {
-                    print $p;
-                  }
-                else
-                  {
-                    print $option;
-                  }
+                print "$p (>= $state->{$p})";
               }
+
+            next SPEC;
           }
+
+        die "can't resolve disjunction '$spec': you must install one of the choices.\n"
       }
   }
 

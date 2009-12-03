@@ -66,10 +66,10 @@ dist-hook:
 	mkdir "$(distdir)/fw"
 	find -L fw -mindepth 1 -print | cpio -pd "$(distdir)"
 	mkdir "$(distdir)/fw/bin"
-	cp `which fw-bootstrap` "$(distdir)/fw/bin"
-	cp `which fw-exec` "$(distdir)/fw/bin"
-	cp `which fw-init` "$(distdir)/fw/bin"
-	cp `which fw-package` "$(distdir)/fw/bin"
+	cp `which fw-bootstrap 2>/dev/null || echo "$(top_srcdir)/bin/fw-bootstrap"` "$(distdir)/fw/bin"
+	cp `which fw-exec 2>/dev/null || echo "$(top_srcdir)/bin/fw-bootstrap"` "$(distdir)/fw/bin"
+	cp `which fw-init 2>/dev/null || echo "$(top_srcdir)/bin/fw-bootstrap"` "$(distdir)/fw/bin"
+	cp `which fw-package 2>/dev/null || echo "$(top_srcdir)/bin/fw-bootstrap"` "$(distdir)/fw/bin"
 
 include $(top_srcdir)/fw/build/automake/check-shell.am
 include $(top_srcdir)/fw/build/automake/gnu-make-check.am
