@@ -110,8 +110,8 @@ mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S}
 mkdir -p "$destdir"/_TMP/root/var/tmp
 mkdir -p "$destdir"/_TMP/root/"$destdir"/_TMP
 ln -s "$destdir"/_TMP/root "$destdir"/_TMP/root/"$destdir"/_TMP/root
-(cd /usr/src/redhat; find . -print | cpio -pvd "$destdir"/_TMP/root/rpmbuild)
-rpmbuild --root "$destdir"/_TMP/root --define "%_topdir $destdir/_TMP/root/rpmbuild" -bb "$destdir"/_TMP/package.spec
+(cd /usr/src/redhat; find . -print | cpio -pd "$destdir"/_TMP/root/rpmbuild >/dev/null 2>/dev/null)
+rpmbuild --quiet --root "$destdir"/_TMP/root --define "%_topdir $destdir/_TMP/root/rpmbuild" -bb "$destdir"/_TMP/package.spec
 test $? -eq 0 || fatal "package/rpm/make-build-package"
 
 cp -f "$destdir"/_TMP/root/rpmbuild/RPMS/$arch/${package}_build-${version}-${releasenum}.${arch}.rpm "${outdir}"
