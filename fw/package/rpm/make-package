@@ -30,6 +30,8 @@ make_spec_file () \
     local depends
     local conflicts
     local conflictstag
+    local provides
+    local providestag
 
     depends=`fw_exec "package/rpm/dependency-range"             \
                      "$FW_PACKAGE_DEPENDS" |                    \
@@ -47,6 +49,18 @@ make_spec_file () \
         conflictstag="#Conflicts:"
       else
         conflictstag="Conflicts: $conflicts"
+      fi
+
+    provides=`perl -e '$ARGV[0] =~ s/[\(\)]//g; s/>>/>/g; s/<</</g; 
+                        print $ARGV[0];' "$FW_PACKAGE_PROVIDES"`
+
+    test $? -eq 0 || fatal "package/rpm/make-package"
+
+    if test "x$provides" = x
+      then
+        providestag="#Conflicts:"
+      else
+        providestag="Conflicts: $provides"
       fi
 
     mkdir "$destdir"/_TMP || fatal "package/rpm/make-package"
@@ -67,6 +81,7 @@ BuildArch: $arch
 #Packager:
 Requires: $depends
 $conflictstag
+$providestag
 
 %description
 $FW_PACKAGE_DESCRIPTION
@@ -99,7 +114,6 @@ EOD
   }
 
 # TODO: hooks
-# TODO: provides
 
 #    hookdir="${libexecdir}/fw/$FW_PACKAGE_NAME-$FW_PACKAGE_VERSION"
 #
