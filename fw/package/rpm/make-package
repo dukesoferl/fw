@@ -28,11 +28,26 @@ fw_source "package/rpm/make-package" "sh/validate-args.sh"
 make_spec_file () \
   {
     local depends
+    local conflicts
+    local conflictstag
 
     depends=`fw_exec "package/rpm/dependency-range"             \
-                     "$FW_PACKAGE_DEPENDS" | perl -pe 's/[\(\)]//g;'`
+                     "$FW_PACKAGE_DEPENDS" |                    \
+             perl -pe 's/[\(\)]//g; s/>>/>/g; s/<</</g;'`
 
     test $? -eq 0 || fatal "package/rpm/make-package"
+
+    conflicts=`perl -e '$ARGV[0] =~ s/[\(\)]//g; s/>>/>/g; s/<</</g; 
+                        print $ARGV[0];' "$FW_PACKAGE_CONFLICTS"`
+
+    test $? -eq 0 || fatal "package/rpm/make-package"
+
+    if test "x$conflicts" = x
+      then
+        conflictstag="#Conflicts:"
+      else
+        conflictstag="Conflicts: $conflicts"
+      fi
 
     mkdir "$destdir"/_TMP || fatal "package/rpm/make-package"
     chmod 755 "$destdir"/_TMP || fatal "package/rpm/make-package"
@@ -51,7 +66,7 @@ BuildArch: $arch
 #Vendor:
 #Packager:
 Requires: $depends
-#Conflicts: 
+$conflictstag
 
 %description
 $FW_PACKAGE_DESCRIPTION
@@ -84,7 +99,7 @@ EOD
   }
 
 # TODO: hooks
-# TODO: conflicts, provides
+# TODO: provides
 
 #    hookdir="${libexecdir}/fw/$FW_PACKAGE_NAME-$FW_PACKAGE_VERSION"
 #
