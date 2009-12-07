@@ -30,6 +30,7 @@ make_spec_file () \
     local depends
     local conflicts
     local conflictstag
+    local hookdir
     local provides
     local providestag
 
@@ -66,6 +67,8 @@ make_spec_file () \
     mkdir "$destdir"/_TMP || fatal "package/rpm/make-package"
     chmod 755 "$destdir"/_TMP || fatal "package/rpm/make-package"
 
+    hookdir="${libexecdir}/fw/$FW_PACKAGE_NAME-$FW_PACKAGE_VERSION"
+
     cat <<EOD > "$destdir"/_TMP/package.spec
 Summary: $FW_PACKAGE_SHORT_DESCRIPTION
 Name: ${package}
@@ -96,6 +99,20 @@ make
 %install
 make DESTDIR="$destdir"/_TMP/root install
 
+#%pre
+# TODO: pre-install ... suck in script (?)
+
+%post
+[ -x "${hookdir}/post-install" ] && "${hookdir}/post-install"
+exit 0
+
+%preun
+[ -x "${hookdir}/pre-remove" ] && "${hookdir}/pre-remove"
+exit 0
+
+#%postun
+# TODO: post-install ... suck in script (?)
+
 %files
 EOD
     find "$destdir" -type f | \
@@ -111,6 +128,20 @@ EOD
               next unless $s =~ /\S/;
               next if $s =~ m%^/?_TMP%;
               print "%dir $s";' "$destdir" >> "$destdir"/_TMP/package.spec
+
+    for x in start stop
+      do
+        if test "$x" = "start"
+          then
+            okmd5=7a8768f94ba14a74361731a2c4bf9d20
+          else
+            okmd5=71e59480baed6df5ce42e42f69d5a077
+          fi
+
+        test -f "${destdir}/${hookdir}/$x" &&                           \
+        test "`md5sum "${destdir}/${hookdir}/$x" | cut -f1 -d' '`" != $okmd5 && \
+        echo "package/rpm/make-package: warning: $x hook not supported" 1>&2
+      done
   }
 
 # TODO: hooks

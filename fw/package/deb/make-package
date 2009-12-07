@@ -67,6 +67,7 @@ get_automatic_dependencies () \
 make_control_files () \
   {
     local description
+    local okmd5
 
     mkdir "$destdir"/DEBIAN || fatal "package/deb/make-package"
     chmod 755 "$destdir"/DEBIAN || fatal "package/deb/make-package"
@@ -114,7 +115,15 @@ EOD
 
     for x in start stop
       do
+        if test "$x" = "start"
+          then
+            okmd5=7a8768f94ba14a74361731a2c4bf9d20
+          else
+            okmd5=71e59480baed6df5ce42e42f69d5a077
+          fi
+
         test -f "${destdir}/${hookdir}/$x" &&                           \
+        test "`md5sum "${destdir}/${hookdir}/$x" | cut -f1 -d' '`" != $okmd5 && \
         echo "package/deb/make-package: warning: $x hook not supported" 1>&2
       done
   }
