@@ -69,6 +69,42 @@ make_spec_file () \
 
     hookdir="${libexecdir}/fw/$FW_PACKAGE_NAME-$FW_PACKAGE_VERSION"
 
+    perl -ne 'exit ($_ !~ m%^#!\s?/bin/sh%)'                    \
+         "${destdir}/${hookdir}/pre-install" ||                 \
+      {
+        echo "package/rpm/make-package: fatal: pre-install hook is not a /bin/sh script" 1>&2
+        fatal "package/rpm/make-package"
+      }
+
+    perl -ne '
+      do 
+        {
+          print STDERR "package/rpm/make-package: ",
+                       "fatal: line $. of $ARGV[0] starts with %\n";
+          exit 1;
+        }
+      if (m/^%/);
+    ' "${destdir}/${hookdir}/pre-install" ||                    \
+    fatal "package/rpm/make-package"
+
+    perl -ne 'exit ($_ !~ m%^#!\s?/bin/sh%)'                    \
+         "${destdir}/${hookdir}/post-remove" ||                 \
+      {
+        echo "package/rpm/make-package: fatal: post-remove hook is not a /bin/sh script" 1>&2
+        fatal "package/rpm/make-package"
+      }
+
+    perl -ne '
+      do 
+        {
+          print STDERR "package/rpm/make-package: ",
+                       "fatal: line $. of $ARGV[0] starts with %\n";
+          exit 1;
+        }
+      if (m/^%/);
+    ' "${destdir}/${hookdir}/post-remove" ||                    \
+    fatal "package/rpm/make-package"
+
     cat <<EOD > "$destdir"/_TMP/package.spec
 Summary: $FW_PACKAGE_SHORT_DESCRIPTION
 Name: ${package}
@@ -99,8 +135,8 @@ make
 %install
 make DESTDIR="$destdir"/_TMP/root install
 
-#%pre
-# TODO: pre-install ... suck in script (?)
+%pre
+`cat "${destdir}/${hookdir}/pre-install"`
 
 %post
 [ -x "${hookdir}/post-install" ] && "${hookdir}/post-install"
@@ -110,8 +146,8 @@ exit 0
 [ -x "${hookdir}/pre-remove" ] && "${hookdir}/pre-remove"
 exit 0
 
-#%postun
-# TODO: post-install ... suck in script (?)
+%postun
+`cat "${destdir}/${hookdir}/post-remove"`
 
 %files
 EOD
@@ -143,28 +179,6 @@ EOD
         echo "package/rpm/make-package: warning: $x hook not supported" 1>&2
       done
   }
-
-# TODO: hooks
-
-#    hookdir="${libexecdir}/fw/$FW_PACKAGE_NAME-$FW_PACKAGE_VERSION"
-#
-#    for x in pre-install post-install pre-remove post-remove
-#      do
-#        target=`echo "$x" | perl -pe 's%^post-%post%;
-#                                      s%^pre-%pre%; 
-#                                      s%install%inst%;
-#                                      s%remove%rm%;'`
-#        test ! -f "${destdir}/${hookdir}/$x" ||                            \
-#        cp -f "${destdir}/${hookdir}/$x" "${destdir}/DEBIAN/${target}" ||  \
-#        fatal "package/rpm/make-package"
-#      done
-#
-#    for x in start stop
-#      do
-#        test -f "${destdir}/${hookdir}/$x" &&                           \
-#        echo "package/rpm/make-package: warning: $x hook not supported" 1>&2
-#      done
-#  }
 
 #---------------------------------------------------------------------
 #                                main                                 
