@@ -31,6 +31,8 @@ make_spec_file () \
     local conflicts
     local conflictstag
     local hookdir
+    local preinterp
+    local postinterp
     local provides
     local providestag
 
@@ -69,12 +71,7 @@ make_spec_file () \
 
     hookdir="${libexecdir}/fw/$FW_PACKAGE_NAME-$FW_PACKAGE_VERSION"
 
-    perl -ne 'exit ($_ !~ m%^#!\s?/bin/sh%)'                    \
-         "${destdir}/${hookdir}/pre-install" ||                 \
-      {
-        echo "package/rpm/make-package: fatal: pre-install hook is not a /bin/sh script" 1>&2
-        fatal "package/rpm/make-package"
-      }
+    preinterp=`perl -ne 's%^#!\s+%%; print; exit 0' "${destdir}/${hookdir}/pre-install"`
 
     perl -ne '
       do 
@@ -87,12 +84,7 @@ make_spec_file () \
     ' "${destdir}/${hookdir}/pre-install" ||                    \
     fatal "package/rpm/make-package"
 
-    perl -ne 'exit ($_ !~ m%^#!\s?/bin/sh%)'                    \
-         "${destdir}/${hookdir}/post-remove" ||                 \
-      {
-        echo "package/rpm/make-package: fatal: post-remove hook is not a /bin/sh script" 1>&2
-        fatal "package/rpm/make-package"
-      }
+    postinterp=`perl -ne 's%^#!\s+%%; print; exit 0' "${destdir}/${hookdir}/post-remove"`
 
     perl -ne '
       do 
@@ -135,18 +127,19 @@ make
 %install
 make DESTDIR="$destdir"/_TMP/root install
 
-%pre
+%pre -p "$preinterp"
 `cat "${destdir}/${hookdir}/pre-install"`
 
 %post
-[ -x "${hookdir}/post-install" ] && "${hookdir}/post-install"
+rpm -q "$FW_PACKAGE_NAME" --queryformat "%{VERSION}\n"
+[ -x "${hookdir}/post-install" ] && "${hookdir}/post-install" "$1"
 exit 0
 
 %preun
-[ -x "${hookdir}/pre-remove" ] && "${hookdir}/pre-remove"
+[ -x "${hookdir}/pre-remove" ] && "${hookdir}/pre-remove" "$1"
 exit 0
 
-%postun
+%postun -p "$postinterp"
 `cat "${destdir}/${hookdir}/post-remove"`
 
 %files
