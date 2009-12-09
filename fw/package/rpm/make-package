@@ -31,10 +31,12 @@ make_spec_file () \
     local conflicts
     local conflictstag
     local hookdir
-    local preinterp
-    local postinterp
     local provides
     local providestag
+    local preinst
+    local postinst
+    local preremove
+    local postremove
 
     depends=`fw_exec "package/rpm/dependency-range"             \
                      "$FW_PACKAGE_DEPENDS" |                    \
@@ -71,31 +73,48 @@ make_spec_file () \
 
     hookdir="${libexecdir}/fw/$FW_PACKAGE_NAME-$FW_PACKAGE_VERSION"
 
-    preinterp=`perl -ne 's%^#!\s+%%; print; exit 0' "${destdir}/${hookdir}/pre-install"`
+    for x in pre-install post-install pre-remove post-remove
+      do
+        perl -ne '
+          do 
+            {
+              print STDERR "package/rpm/make-package: ",
+                           "fatal: line $. of $ARGV[0] starts with % ",
+                           "or _RPMEOF\n";
+              exit 1;
+            }
+          if (m/^(%|_RPMEOF)/);
+        ' "${destdir}/${hookdir}/$x" ||                    \
+        fatal "package/rpm/make-package"
+      done
 
-    perl -ne '
-      do 
-        {
-          print STDERR "package/rpm/make-package: ",
-                       "fatal: line $. of $ARGV[0] starts with %\n";
-          exit 1;
-        }
-      if (m/^%/);
-    ' "${destdir}/${hookdir}/pre-install" ||                    \
-    fatal "package/rpm/make-package"
+    if test -s "${destdir}/${hookdir}/pre-install"
+      then
+        preinst=`cat "${destdir}/${hookdir}/pre-install"`
+      else
+        preinst="#! /bin/sh\nexit 0"
+      fi
 
-    postinterp=`perl -ne 's%^#!\s+%%; print; exit 0' "${destdir}/${hookdir}/post-remove"`
+    if test -s "${destdir}/${hookdir}/post-install"
+      then
+        postinst=`cat "${destdir}/${hookdir}/post-install"`
+      else
+        postinst="#! /bin/sh\nexit 0"
+      fi
 
-    perl -ne '
-      do 
-        {
-          print STDERR "package/rpm/make-package: ",
-                       "fatal: line $. of $ARGV[0] starts with %\n";
-          exit 1;
-        }
-      if (m/^%/);
-    ' "${destdir}/${hookdir}/post-remove" ||                    \
-    fatal "package/rpm/make-package"
+    if test -s "${destdir}/${hookdir}/pre-remove"
+      then
+        preremove=`cat "${destdir}/${hookdir}/pre-remove"`
+      else
+        preremove="#! /bin/sh\nexit 0"
+      fi
+
+    if test -s "${destdir}/${hookdir}/post-remove"
+      then
+        postremove=`cat "${destdir}/${hookdir}/post-remove"`
+      else
+        postremove="#! /bin/sh\nexit 0"
+      fi
 
     cat <<EOD > "$destdir"/_TMP/package.spec
 Summary: $FW_PACKAGE_SHORT_DESCRIPTION
@@ -127,21 +146,76 @@ make
 %install
 make DESTDIR="$destdir"/_TMP/root install
 
-%pre -p "$preinterp"
-`cat "${destdir}/${hookdir}/pre-install"`
+%pretrans
+set +e
+rpm -q "$FW_PACKAGE_NAME" --queryformat '%{VERSION}' | grep -v 'not installed' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version
+set -e
+printf "%s" "$FW_PACKAGE_VERSION" > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".new_version
+cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst
+$preinst
+_RPMEOF
+chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst
+cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostinst
+$postinst
+_RPMEOF
+chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostinst
+cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreremove
+$preremove
+_RPMEOF
+chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreremove
+cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostremove
+$postremove
+_RPMEOF
+chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostremove
+exit 0
+%pre
+set -e
+if test "\$1" -eq 1
+  then
+    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst install
+  else
+    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreremove failed-upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`" && \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst failed-upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`"
+  fi
 
+exit 0
 %post
-rpm -q "$FW_PACKAGE_NAME" --queryformat "%{VERSION}\n"
-[ -x "${hookdir}/post-install" ] && "${hookdir}/post-install" "$1"
 exit 0
-
 %preun
-[ -x "${hookdir}/pre-remove" ] && "${hookdir}/pre-remove" "$1"
+set -e
+if test "\$1" -eq 0
+  then
+    cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpreremove
+$preremove
+_RPMEOF
+    chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpreremove
+
+    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpreremove remove
+  else
+    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostremove failed-upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".new_version\`"
+  fi
+
 exit 0
+%postun
+set -e
+if test "\$1" -eq 0
+  then
+    cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpostremove
+$postremove
+_RPMEOF
+    chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpostremove
 
-%postun -p "$postinterp"
-`cat "${destdir}/${hookdir}/post-remove"`
+    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpostremove remove
+    rm -f \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME"*
+  else
+    true
+  fi
 
+exit 0
+%posttrans
+set -e
+\${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostinst configure "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`"
+rm -f \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME"*
+exit 0
 %files
 EOD
     find "$destdir" -type f | \
