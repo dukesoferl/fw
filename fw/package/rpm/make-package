@@ -27,22 +27,30 @@ fw_source "package/rpm/make-package" "sh/validate-args.sh"
 
 make_spec_file () \
   {
-    local depends
     local conflicts
     local conflictstag
+    local depends
+    local dependstag
     local hookdir
+    local postinst
+    local postremove
+    local preinst
+    local preremove
     local provides
     local providestag
-    local preinst
-    local postinst
-    local preremove
-    local postremove
 
     depends=`fw_exec "package/rpm/dependency-range"             \
                      "$FW_PACKAGE_DEPENDS" |                    \
              perl -pe 's/[\(\)]//g; s/>>/>/g; s/<</</g;'`
 
     test $? -eq 0 || fatal "package/rpm/make-package"
+
+    if test "x$depends" = x
+      then
+        dependstag="#Requires:"
+      else
+        dependstag="Requires: $depends"
+      fi
 
     conflicts=`perl -e '$ARGV[0] =~ s/[\(\)]//g; s/>>/>/g; s/<</</g; 
                         print $ARGV[0];' "$FW_PACKAGE_CONFLICTS"`
@@ -129,7 +137,7 @@ BuildArch: $arch
 #Distribution:
 #Vendor:
 #Packager:
-Requires: $depends
+$dependstag
 $conflictstag
 $providestag
 
