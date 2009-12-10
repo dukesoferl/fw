@@ -292,7 +292,7 @@ if test "x$release" = xyes
 
 make_spec_file
 
-make -s dist
+make -s dist || fatal "package/rpm/make-package"
 
 mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S}
 mkdir -p "$destdir"/_TMP/root/var/tmp
