@@ -14,11 +14,6 @@ case "$1" in
   install)
     ;;
   upgrade)
-    # defer to newer package's script
-    exit 1
-    ;;
-  failed-upgrade)
-    # actually handle the upgrade here
     # old version is $2
     ;;
   *)

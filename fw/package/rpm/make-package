@@ -185,7 +185,7 @@ if test "\$1" -eq 1
   then
     \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst install
   else
-    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreremove failed-upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`" && \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst failed-upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`"
+    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreremove failed-upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`" && \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`"
   fi
 
 exit 0
