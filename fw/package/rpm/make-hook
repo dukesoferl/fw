@@ -90,12 +90,31 @@ make_post_install () {
 
 compare_versions="$comparescript"
 
+canonicalize () {
+  perl -e '(\$_) = @ARGV; s/-TEST1\$//; print \$_' -- "\$1"
+}
+
 $preamble
 
-operation=configure
-# TODO: does this always return FW_PACKAGE_VERSION ?
-canon_most_recently_configured_version="\`rpm -q \"$FW_PACKAGE_NAME\" --queryformat \"%{VERSION}\"\`"
-$configure
+operation="\$1"
+
+case "\$operation" in
+  configure)
+    most_recently_configured_version="\$2"
+    canon_most_recently_configured_version="\`canonicalize \"\$most_recently_configured_version\"\`"
+    $configure
+    ;;
+  abort-upgrade)
+    new_version="\$2"
+    canon_new_version="\`canonicalize \"\$new_version\"\`"
+    $abort_upgrade
+    ;;
+  abort-remove)
+    $abort_remove
+    ;;
+  *)
+    ;;
+esac
 
 $postamble
 
@@ -109,19 +128,48 @@ make_post_remove () {
 
 compare_versions="$comparescript"
 
+case "\$1" in
+  upgrade)
+    exit 1 # defer to new package's version
+    ;;
+  *)
+    ;;
+esac
+
+canonicalize () {
+  perl -e '(\$_) = @ARGV; s/-TEST1\$//; print \$_' -- "\$1"
+}
+
 $preamble
 
-case \"\$1\" in
-  1)
-    operation=upgrade
-    canon_old_version="${FW_PACKAGE_VERSION}"
+operation="\$1"
+
+case "\$operation" in
+  remove)
+    $remove
+    ;;
+  purge)
+    $purge
+    ;;
+  failed-upgrade)
+    old_version="\$2"
+    canon_old_version="\`canonicalize \"\$old_version\"\`"
     $upgrade
     ;;
-  0)
-    operation=remove
+  abort-install)
+    old_version="\$2"
+    canon_old_version="\`canonicalize \"\$old_version\"\`"
+    $abort_install
+    ;;
+  abort-upgrade)
+    old_version="\$2"
+    canon_old_version="\`canonicalize \"\$old_version\"\`"
+    $abort_upgrade
+    ;;
+  disappear)
     $remove
-    operation=purge
-    $purge
+    ;;
+  *)
     ;;
 esac
 
@@ -137,21 +185,34 @@ make_pre_install () {
 
 compare_versions="$comparescript"
 
+canonicalize () {
+  perl -e '(\$_) = @ARGV; s/-TEST1\$//; print \$_' -- "\$1"
+}
+
 $preamble
 
-case \"\$1\" in
-  1)
-    operation=install
-    canon_old_version="\`rpm -q \"$FW_PACKAGE_NAME\" --queryformat \"%{VERSION}\"\`"
+operation="\$1"
+
+case "\$operation" in
+  install)
+    old_version="\$2"
+    canon_old_version="\`canonicalize \"\$old_version\"\`"
     $install
     ;;
-  2)
-    operation=upgrade
-    canon_old_version="\`rpm -q \"$FW_PACKAGE_NAME\" --queryformat \"%{VERSION}\"\`"
+  upgrade)
+    old_version="\$2"
+    canon_old_version="\`canonicalize \"\$old_version\"\`"
     $upgrade
     ;;
+  abort-upgrade)
+    new_version="\$2"
+    canon_new_version="\`canonicalize \"\$new_version\"\`"
+    $abort_upgrade
+    ;;
+  *)
+    ;;
 esac
-    
+
 $postamble
 
 exit 0
@@ -164,18 +225,35 @@ make_pre_remove () {
 
 compare_versions="$comparescript"
 
+case "\$1" in
+  upgrade)
+    exit 1 # defer to new package's version
+    ;;
+  *)
+    ;;
+esac
+
+canonicalize () {
+  perl -e '(\$_) = @ARGV; s/-TEST1\$//; print \$_' -- "\$1"
+}
+
 $preamble
 
-case \"\$1\" in
-  1)
-    operation=upgrade
-    # TODO: does this return the newly installed version (?) 
-    canon_new_version="\`rpm -q \"$FW_PACKAGE_NAME\" --queryformat \"%{VERSION}\"\`"
+operation="\$1"
+
+case "\$operation" in
+  remove)
+    $remove
+    ;;
+  failed-upgrade)
+    old_version="\$2"
+    canon_old_version="\`canonicalize \"\$old_version\"\`"
     $upgrade
     ;;
-  0)
-    operation=remove
-    $remove
+  deconfigure)
+    $deconfigure
+    ;;
+  *)
     ;;
 esac
 
@@ -189,28 +267,24 @@ EOD
 #                                main                                 
 #---------------------------------------------------------------------
 
-# TODO
+parse_args "package/rpm/make-hook" "$@"
 
-exit 1
+validate_args "package/rpm/make-hook" "hook" ""
 
-#parse_args "package/rpm/make-hook" "$@"
-#
-#validate_args "package/rpm/make-hook" "hook" ""
-#
-#case "$hook" in
-#  post-install)
-#    make_post_install
-#    ;;
-#  post-remove)
-#    make_post_remove
-#    ;;
-#  pre-install)
-#    make_pre_install
-#    ;;
-#  pre-remove)
-#    make_pre_remove
-#    ;;
-#  *)
-#    echo "package/rpm/make-hook: warning: unsupported hook '$hook'" 1>&2
-#    exit 0
-#esac
+case "$hook" in
+  post-install)
+    make_post_install
+    ;;
+  post-remove)
+    make_post_remove
+    ;;
+  pre-install)
+    make_pre_install
+    ;;
+  pre-remove)
+    make_pre_remove
+    ;;
+  *)
+    echo "package/rpm/make-hook: warning: unsupported hook '$hook'" 1>&2
+    exit 0
+esac
