@@ -39,11 +39,14 @@ make_spec_file () \
     local provides
     local providestag
 
-    depends=`fw_exec "package/rpm/dependency-range"             \
-                     "$FW_PACKAGE_DEPENDS" |                    \
-             perl -pe 's/[\(\)]//g; s/>>/>/g; s/<</</g;'`
-
-    test $? -eq 0 || fatal "package/rpm/make-package"
+    if test "x$FW_PACKAGE_DEPENDS" = x
+      then
+        depends=""
+      else
+        depends=`fw_exec "package/rpm/dependency-range"             \
+                         "$FW_PACKAGE_DEPENDS" |                    \
+                 perl -pe 's/[\(\)]//g; s/>>/>/g; s/<</</g;'`
+      fi
 
     if test "x$depends" = x
       then

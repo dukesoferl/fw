@@ -64,12 +64,15 @@ EXTRA_DIST =			\
 dist-hook:
 	rm -rf "$(distdir)/fw"
 	mkdir "$(distdir)/fw"
+	if test -h fw/share; then rm -f fw/share; else true; fi
 	find -L fw -mindepth 1 -print | cpio -pd "$(distdir)" >/dev/null 2>/dev/null
-	mkdir "$(distdir)/fw/bin"
+	test -d "$(distdir)/fw/bin" || mkdir "$(distdir)/fw/bin"
 	cp `env PATH="$(top_srcdir)/bin:$$PATH" which fw-bootstrap` "$(distdir)/fw/bin"
 	cp `env PATH="$(top_srcdir)/bin:$$PATH" which fw-exec` "$(distdir)/fw/bin"
 	cp `env PATH="$(top_srcdir)/bin:$$PATH" which fw-init` "$(distdir)/fw/bin"
 	cp `env PATH="$(top_srcdir)/bin:$$PATH" which fw-package` "$(distdir)/fw/bin"
+	test -f "$(distdir)/install-sh" || cp -p "$(top_srcdir)/install-sh" "$(distdir)"
+	test -f "$(distdir)/missing" || cp -p "$(top_srcdir)/missing" "$(distdir)"
 
 include $(top_srcdir)/fw/build/automake/check-shell.am
 include $(top_srcdir)/fw/build/automake/gnu-make-check.am
