@@ -21,19 +21,19 @@ validate_args () \
         eval test -d \"fw.local/$x/\$$x/\"                      || {
           eval echo \"$1: error: unknown $x \$$x\"   1>&2
           printf "$1: error: supported values are: " 1>&2
-          (
-            (
-              cd "fw/$x" 2>/dev/null || cd "${FW_ROOT}/share/fw/$x"
-              find . -maxdepth 1 -mindepth 1 -type d | sort | \
-              perl -pe 's%\./%%; s%\n% %;' 
-            )
-            (
-              cd "fw.local/$x" 2>/dev/null &&                     \
-              find . -maxdepth 1 -mindepth 1 -type d | sort | \
-              perl -pe 's%\./%%; s%\n% %;'
-            )
+          {
+            {
+              (
+                cd "fw/$x" 2>/dev/null || cd "${FW_ROOT}/share/fw/$x"
+                find . -maxdepth 1 -mindepth 1 -type d
+              )
+              (
+                cd "fw.local/$x" 2>/dev/null &&                   \
+                find . -maxdepth 1 -mindepth 1 -type d 
+              )
+            } | sort -u | perl -ne 's%\./%%; s%\n% %; next if m%^\.%; print' 
             echo
-          ) 1>&2
+          } 1>&2
           fatal "$1"
         }
       done

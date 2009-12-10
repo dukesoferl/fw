@@ -10,13 +10,20 @@ package-%: all
 release-%: all
 	./create-package --build automake --package "$*" --revision "@FW_REVISION_TYPE@" --release yes --ldd "@FW_LDD@" --ldd_args "@FW_LDD_ARGS@" --libexecdir "$(libexecdir)" @FW_BUILD_AUTOMAKE_CREATE_PACKAGE_EXTRA_ARGS@
 
+.PHONY: source_install-%
+source_install-%:
+	./create-package --build automake --package "$*" --revision "@FW_REVISION_TYPE@" --release no --source_install_only true --ldd "@FW_LDD@" --ldd_args "@FW_LDD_ARGS@" --libexecdir "$(libexecdir)" --destdir "${DESTDIR}" @FW_BUILD_AUTOMAKE_CREATE_PACKAGE_EXTRA_ARGS@
+
 .PHONY: package
 .PHONY: release
+.PHONY: source_install
 
 if FW_HAVE_NATIVE_PACKAGE_TYPE
 package: package-@FW_NATIVE_PACKAGE_TYPE@
 
 release: release-@FW_NATIVE_PACKAGE_TYPE@
+
+source_install: source_install-@FW_NATIVE_PACKAGE_TYPE@
 endif
 
 ac-init.generated: fw-pkgin/config
@@ -32,6 +39,7 @@ noinst_DATA =			\
 CLEANFILES =
 
 maintainer-clean-local:
+	@test ! -h fw || rm -f fw
 	@test ! -d fw-pkgtmp || rm -rf fw-pkgtmp
 	@test ! -d autom4te.cache || rm -rf autom4te.cache
 
@@ -47,7 +55,6 @@ MAINTAINERCLEANFILES =		\
   configure.ac			\
   create-package		\
   depcomp			\
-  fw				\
   install-sh			\
   missing			\
   mkinstalldirs			\
@@ -59,6 +66,7 @@ MAINTAINERCLEANFILES =		\
 EXTRA_DIST =			\
   Makefile.am.local		\
   bootstrap			\
+  build				\
   configure.ac.local
 
 dist-hook:

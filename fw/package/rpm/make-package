@@ -151,11 +151,11 @@ $FW_PACKAGE_DESCRIPTION
 %setup
 
 %build
-./configure
-make
+./build
 
 %install
-make DESTDIR="$destdir"/_TMP/root install
+# TODO: ERROR ... using make breaks abstraction
+make DESTDIR="$destdir"/_TMP/root source_install-rpm
 
 %pretrans
 set +e
