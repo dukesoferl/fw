@@ -157,6 +157,9 @@ $FW_PACKAGE_DESCRIPTION
 # TODO: ERROR ... using make breaks abstraction
 make DESTDIR="$destdir"/_TMP/root source_install-rpm
 
+%clean
+rm -rf "$RPM_BUILD_DIR/%{name}-%{version}"
+
 %pretrans
 set +e
 rpm -q "$FW_PACKAGE_NAME" --queryformat '%{VERSION}' | grep -v 'not installed' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version
