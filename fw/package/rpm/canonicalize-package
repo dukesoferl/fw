@@ -12,7 +12,7 @@ my $package = $ARGV[0];
 # http://www.mail-archive.com/rpm-devel@rpm5.org/msg03327.html
 #---------------------------------------------------------------------
 
-if ($package =~ m/[^a-z0-9\+\.\-]/)
+if ($package =~ m/[^a-z0-9\+\.\-_]/)
   { 
     die "package/rpm/canonicalize-package: fatal: package '$package' may contain only lowercase characters, numbers, dashes, pluses, dots, or '_'.\n";
   }
