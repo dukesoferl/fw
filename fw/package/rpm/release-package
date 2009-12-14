@@ -38,7 +38,7 @@ which rpm > /dev/null 2>/dev/null || {
 
 eval `fw_exec "template/$template/load-config"`
 
-for x in RPM_REPO_HOST RPM_REPO_USER RPM_REPO_BASEDIR
+for x in FW_RPM_REPO_HOST FW_RPM_REPO_USER FW_RPM_REPO_BASEDIR
   do
     eval test -n \"\$$x\" || { 
       eval echo "rpm/release-package: error: \\\$$x not defined" 1>&2
@@ -63,7 +63,7 @@ if test "x$release" = xyes
     releasenum="TEST1"
   fi
 
-buildarch=`rpm -q rpm --queryformat ${arch}`
+buildarch=`rpm -q rpm --queryformat %{arch}`
 
 ssh -q "${FW_RPM_REPO_USER}@${FW_RPM_REPO_HOST}"                      \
        "which createrepo >/dev/null 2>/dev/null" || {
@@ -73,7 +73,7 @@ ssh -q "${FW_RPM_REPO_USER}@${FW_RPM_REPO_HOST}"                      \
 
 for rpm in "${package}-${version}-${releasenum}.src.rpm"                \
            "${package}-${version}-${releasenum}.${arch}.rpm"            \
-           "${package}_build-${version}-${releasenum}.${arch}.rpm"
+           "${package}_build-${version}-${releasenum}.${buildarch}.rpm"
   do
     case $rpm in
       *.src.rpm)
@@ -88,21 +88,42 @@ for rpm in "${package}-${version}-${releasenum}.src.rpm"                \
         printf "*\n"
         ;;
       *)
-        printf "(%s) %s " "$arch" "$rpm"
+        packarch=`perl -e '$ARGV[0] =~ /\.([^\.]+).rpm$/ && print $1' "$rpm"`
+        printf "(%s) %s " "$packarch" "$rpm"
         ssh -q "${FW_RPM_REPO_USER}@${FW_RPM_REPO_HOST}"                      \
-            "mkdir -p '${FW_RPM_REPO_BASEDIR}/${arch}'" ||
+            "mkdir -p '${FW_RPM_REPO_BASEDIR}/${packarch}'" ||
           fatal "rpm/release-package"
         printf "+ " 
         scp -q "${outdir}/${rpm}"                                       \
-               "${FW_RPM_REPO_USER}@${FW_RPM_REPO_HOST}:${FW_RPM_REPO_BASEDIR}/${arch}" ||
+               "${FW_RPM_REPO_USER}@${FW_RPM_REPO_HOST}:${FW_RPM_REPO_BASEDIR}/${packarch}" ||
           fatal "rpm/release-package"
         printf "*\n"
         ;;
     esac
   done
 
-args=${FW_RPM_CREATEREPO_ARGS:="-q --update"}
+case "x$FW_RPM_CREATEREPO_INCREMENTAL" in
+  xno)
+    updatearg=""
+    ;;
+  xyes)
+    updatearg="--update"
+    ;;
+  *)
+    if 
+      ssh -q "${FW_RPM_REPO_USER}@${FW_RPM_REPO_HOST}"                      \
+             "test -f ${FW_RPM_REPO_BASEDIR}/repodata/primary.xml.gz"
+    then
+      updatearg="--update"
+    else
+      updatearg=""
+    fi
+
+    ;;
+esac
+
+args=${FW_RPM_CREATEREPO_ARGS:="-q"}
 
 ssh -q "${FW_RPM_REPO_USER}@${FW_RPM_REPO_HOST}"                      \
        "cd '${FW_RPM_REPO_BASEDIR}'; 
-        createrepo $args . && ${FW_RPM_POSTCREATEREPO_COMMANDS:=true}"
+        createrepo $updatearg $args . && ${FW_RPM_POSTCREATEREPO_COMMANDS:=true}"
