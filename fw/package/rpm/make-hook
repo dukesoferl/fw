@@ -23,72 +23,78 @@ fw_source "package/rpm/make-hook" "sh/fw-exec.sh"
 fw_source "package/rpm/make-hook" "sh/parse-args.sh"
 fw_source "package/rpm/make-hook" "sh/validate-args.sh"
 
-comparescript="perl -e '
-  sub rpmvercmp (\$\$)
-    {
-      my (\$a, \$b) = @_;
+comparescript="
+rpm_compare () { 
+  perl -e '
+    sub rpmvercmp (\$\$)
+      {
+        my (\$a, \$b) = @_;
 
-      return 0 if \$a == \$b;
+        return 0 if \$a == \$b;
 
-      my @aver = split /[^[:alnum]]/, \$a;
-      my @bver = split /[^[:alnum]]/, \$b;
+        my @aver = split /[^[:alnum]]/, \$a;
+        my @bver = split /[^[:alnum]]/, \$b;
 
-      return 1 if @aver > @bver;
-      return -1 if @aver < @bver;
+        return 1 if @aver > @bver;
+        return -1 if @aver < @bver;
 
-      my \$cmp = 0;
+        my \$cmp = 0;
 
-      foreach my \$av (@aver)
-        {
-          my \$bv = shift @bver;
+        foreach my \$av (@aver)
+          {
+            my \$bv = shift @bver;
 
-          if (\$av =~ /[^\d]/ || \$bv =~ /[^\d]/)
-            {
-              \$cmp = (\$av cmp \$bv);
-            }
-          else
-            {
-              \$cmp = (\$av <=> \$bv);
-            }
+            if (\$av =~ /[^\d]/ || \$bv =~ /[^\d]/)
+              {
+                \$cmp = (\$av cmp \$bv);
+              }
+            else
+              {
+                \$cmp = (\$av <=> \$bv);
+              }
 
-          return \$cmp if \$cmp;
-        }
+            return \$cmp if \$cmp;
+          }
 
-      return 0;
-    };
+        return 0;
+      };
 
-  if (\$ARGV[1] eq \"lt\")
-    {
-      exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) < 0) ? 0 : 1);
-    }
-  elsif (\$ARGV[1] eq \"le\")
-    {
-      exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) <= 0) ? 0 : 1);
-    }
-  elsif (\$ARGV[1] eq \"eq\")
-    {
-      exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) == 0) ? 0 : 1);
-    }
-  elsif (\$ARGV[1] eq \"ne\")
-    {
-      exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) != 0) ? 0 : 1);
-    }
-  elsif (\$ARGV[1] eq \"ge\")
-    {
-      exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) >= 0) ? 0 : 1);
-    }
-  elsif (\$ARGV[1] eq \"gt\")
-    {
-      exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) > 0) ? 0 : 1);
-    }
+    if (\$ARGV[1] eq \"lt\")
+      {
+        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) < 0) ? 0 : 1);
+      }
+    elsif (\$ARGV[1] eq \"le\")
+      {
+        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) <= 0) ? 0 : 1);
+      }
+    elsif (\$ARGV[1] eq \"eq\")
+      {
+        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) == 0) ? 0 : 1);
+      }
+    elsif (\$ARGV[1] eq \"ne\")
+      {
+        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) != 0) ? 0 : 1);
+      }
+    elsif (\$ARGV[1] eq \"ge\")
+      {
+        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) >= 0) ? 0 : 1);
+      }
+    elsif (\$ARGV[1] eq \"gt\")
+      {
+        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) > 0) ? 0 : 1);
+      }
 
-  die \"bad arguments\";' "
+    die \"bad arguments\";' \"\$@\" 
+}
+"
 
 make_post_install () {
   cat <<EOD
 #! /bin/sh
 
-compare_versions="$comparescript"
+$comparescript
+
+compare_versions=rpm_compare
 
 canonicalize () {
   perl -e '(\$_) = @ARGV; s/-TEST1\$//; print \$_' -- "\$1"
@@ -126,7 +132,9 @@ make_post_remove () {
   cat <<EOD
 #! /bin/sh
 
-compare_versions="$comparescript"
+$comparescript
+
+compare_versions=rpm_compare
 
 case "\$1" in
   upgrade)
@@ -183,7 +191,9 @@ make_pre_install () {
   cat <<EOD
 #! /bin/sh
 
-compare_versions="$comparescript"
+$comparescript
+
+compare_versions=rpm_compare
 
 canonicalize () {
   perl -e '(\$_) = @ARGV; s/-TEST1\$//; print \$_' -- "\$1"
@@ -223,7 +233,9 @@ make_pre_remove () {
   cat <<EOD
 #! /bin/sh
 
-compare_versions="$comparescript"
+$comparescript
+
+compare_versions=rpm_compare
 
 case "\$1" in
   upgrade)

@@ -157,6 +157,9 @@ $FW_PACKAGE_DESCRIPTION
 # TODO: ERROR ... using make breaks abstraction
 make DESTDIR="$destdir"/_TMP/root source_install-rpm
 
+%clean
+rm -rf "$RPM_BUILD_DIR/%{name}-%{version}"
+
 %pretrans
 set +e
 rpm -q "$FW_PACKAGE_NAME" --queryformat '%{VERSION}' | grep -v 'not installed' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version
@@ -228,6 +231,7 @@ set -e
 rm -f \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME"*
 exit 0
 %files
+%defattr(-,root,root,-)
 EOD
     find "$destdir" -type f | \
     perl -ne 'BEGIN { $l = length shift @ARGV; };
@@ -237,11 +241,13 @@ EOD
               print $s;' "$destdir" >> "$destdir"/_TMP/package.spec
 
     find "$destdir" -type d | \
-    perl -ne 'BEGIN { $l = length shift @ARGV; };
-              $s = substr ($_, $l);
-              next unless $s =~ /\S/;
-              next if $s =~ m%^/?_TMP%;
-              print "%dir $s";' "$destdir" >> "$destdir"/_TMP/package.spec
+    perl -lne 'BEGIN { $l = length shift @ARGV; };
+               chomp;
+               $s = substr ($_, $l);
+               next unless $s =~ /\S/;
+               next if $s =~ m%^/?_TMP%;
+               next if -l $s;            # fix the /etc/init.d problem
+               print "%dir $s";' "$destdir" >> "$destdir"/_TMP/package.spec
 
     for x in start stop
       do
@@ -292,7 +298,7 @@ if test "x$release" = xyes
 
 make_spec_file
 
-make -s dist
+make -s dist || fatal "package/rpm/make-package"
 
 mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S}
 mkdir -p "$destdir"/_TMP/root/var/tmp
