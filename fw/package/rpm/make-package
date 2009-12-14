@@ -228,6 +228,7 @@ set -e
 rm -f \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME"*
 exit 0
 %files
+%defattr(-,root,root,-)
 EOD
     find "$destdir" -type f | \
     perl -ne 'BEGIN { $l = length shift @ARGV; };
