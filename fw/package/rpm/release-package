@@ -122,7 +122,7 @@ case "x$FW_RPM_CREATEREPO_INCREMENTAL" in
     ;;
 esac
 
-args=${FW_RPM_CREATEREPO_ARGS:="-q"}
+args=${FW_RPM_CREATEREPO_ARGS:="-q --database"}
 
 ssh -q "${FW_RPM_REPO_USER}@${FW_RPM_REPO_HOST}"                      \
        "cd '${FW_RPM_REPO_BASEDIR}'; 
