@@ -35,7 +35,7 @@ make_spec_file () \
                      "$FW_PACKAGE_BUILD_DEPENDS"                \
                      "$release" | perl -pe 's/\(=/= /g; s/\)//g;';`
 
-    test $? -eq 0 || fatal "package/rpm/make-build-package"
+    test -n "$depends" || fatal "package/rpm/make-build-package"
 
     mkdir "$destdir"/_TMP || fatal "package/rpm/make-build-package"
     chmod 755 "$destdir"/_TMP || fatal "package/rpm/make-build-package"
