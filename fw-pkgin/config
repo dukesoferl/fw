@@ -40,7 +40,7 @@ FW_DUPLOAD_ARGS=${FW_DUPLOAD_ARGS-"-t dukeshardy"}
 
 FW_RPM_REPO_USER=${FW_RPM_REPO_USER-"`whoami`"}
 FW_RPM_REPO_HOST=${FW_RPM_REPO_HOST-"ub32srvvmw"}
-FW_RPM_REPO_BASEDIR=${FW_RPM_REPO_BASEDIR-"/var/package/dukes/yum"}
+FW_RPM_REPO_BASEDIR=${FW_RPM_REPO_BASEDIR-"/var/yum"}
 FW_RPM_CREATEREPO_ARGS=${FW_RPM_CREATEREPO_ARGS-"-q --database"}
 
 # this variable controls whether createrepo is run incrementally (--update).
@@ -49,6 +49,6 @@ FW_RPM_CREATEREPO_ARGS=${FW_RPM_CREATEREPO_ARGS-"-q --database"}
 FW_RPM_CREATEREPO_INCREMENTAL=${FW_RPM_CREATEREPO_INCREMENTAL-"auto"}
 
 # these commands will be run after a successful createrepo run
-FW_RPM_POSTCREATEREPO_COMMANDS=${FW_RPM_POSTCREATEREPO_COMMANDS-"true"}
+FW_RPM_POSTCREATEREPO_COMMANDS=${FW_RPM_POSTCREATEREPO_COMMANDS-"{ cd /var; rsync -a yum /var/package/dukes; }"}
 # here's a suggestion:
 # FW_RPM_POSTCREATEREPO_COMMANDS="gpg --detach-sign --armor repodata/repomd.xml"
