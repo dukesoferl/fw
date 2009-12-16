@@ -23,10 +23,32 @@ FW_PACKAGE_SUGGESTS="dupload, fakeroot"
 FW_PACKAGE_BUILD_DEPENDS="automake, autoconf2.5 [darwin-i386], autoconf [!darwin-i386], make [!darwin-i386]"
 FW_PACKAGE_BUILD_CONFLICTS=""
 
-FW_DUPLOAD_ARGS=${FW_DUPLOAD_ARGS-"-t dukeshardy"}
-
 FW_SUBVERSION_TAG_ROOT="https://fwtemplates.googlecode.com/svn/tags/fw"
 
-FW_RPM_REPO_USER=`whoami`
-FW_RPM_REPO_HOST="localhost"
-FW_RPM_REPO_BASEDIR="/var/tmp/myrepo"
+# dupload is used for submitting debian packages to a package archive
+# The FW_DUPLOAD_ARGS field is populated with the environment variable
+# FW_DEFAULT_DUPLOAD_ARGS if non-empty at init time
+
+FW_DUPLOAD_ARGS=${FW_DUPLOAD_ARGS-"-t dukeshardy"}
+
+# scp+createrepo is used for submitting rpm packages to a package archive
+# The FW_RPM_REPO_USER, FW_RPM_REPO_HOST, FW_RPM_REPO_BASEDIR,
+# and FW_RPM_POSTCREATEREPO_COMMANDS variables are populated with
+# FW_RPM_REPO_USER_DEFAULT, FW_RPM_REPO_HOST_DEFAULT,
+# FW_RPM_REPO_BASEDIR_DEFAULT, and FW_RPM_POSTCREATEREPO_COMMANDS_DEFAULT
+# respectively if non-empty at init time
+
+FW_RPM_REPO_USER=${FW_RPM_REPO_USER-"`whoami`"}
+FW_RPM_REPO_HOST=${FW_RPM_REPO_HOST-"ub32srvvmw"}
+FW_RPM_REPO_BASEDIR=${FW_RPM_REPO_BASEDIR-"/var/package/dukes/yum"}
+FW_RPM_CREATEREPO_ARGS=${FW_RPM_CREATEREPO_ARGS-"-q --database"}
+
+# this variable controls whether createrepo is run incrementally (--update).
+# possible settings are yes (always do it), no (never do it), and
+# auto (do it if the repository has been previously initialized)
+FW_RPM_CREATEREPO_INCREMENTAL=${FW_RPM_CREATEREPO_INCREMENTAL-"auto"}
+
+# these commands will be run after a successful createrepo run
+FW_RPM_POSTCREATEREPO_COMMANDS=${FW_RPM_POSTCREATEREPO_COMMANDS-"true"}
+# here's a suggestion:
+# FW_RPM_POSTCREATEREPO_COMMANDS="gpg --detach-sign --armor repodata/repomd.xml"
