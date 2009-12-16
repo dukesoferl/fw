@@ -136,6 +136,7 @@ License: Unknown
 Group: Optional
 Source: file:///${package}-${version}.tar.gz
 BuildArch: $arch
+BuildRoot: %{_tmppath}/%{name}-buildroot
 #URL:
 #Distribution:
 #Vendor:
@@ -151,14 +152,17 @@ $FW_PACKAGE_DESCRIPTION
 %setup
 
 %build
-./build
+if [ -d "\$RPM_BUILD_ROOT" ]; then rm -rf "\$RPM_BUILD_ROOT"; fi
+mkdir -p "\$RPM_BUILD_ROOT"
+CFLAGS="\$RPM_OPT_FLAGS" ./build
 
 %install
 # TODO: ERROR ... using make breaks abstraction
-make DESTDIR="$destdir"/_TMP/root source_install-rpm
+make DESTDIR="\$RPM_BUILD_ROOT" source_install-rpm
 
 %clean
-rm -rf "$RPM_BUILD_DIR/%{name}-%{version}"
+if [ -d "\$RPM_BUILD_ROOT" ]; then rm -rf "\$RPM_BUILD_ROOT"; fi
+rm -rf "\$RPM_BUILD_DIR/%{name}-%{version}"
 
 %pretrans
 set +e
@@ -233,6 +237,8 @@ exit 0
 %files
 %defattr(-,root,root,-)
 EOD
+# TODO: this is a bit dangerous because the files list might be architecture 
+# dependent
     find "$destdir" -type f | \
     perl -ne 'BEGIN { $l = length shift @ARGV; };
               $s = substr ($_, $l);
@@ -301,12 +307,9 @@ make_spec_file
 make -s dist || fatal "package/rpm/make-package"
 
 mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S}
-mkdir -p "$destdir"/_TMP/root/var/tmp
-mkdir -p "$destdir"/_TMP/root/"$destdir"/_TMP
-ln -s "$destdir"/_TMP/root "$destdir"/_TMP/root/"$destdir"/_TMP/root
 (cd /usr/src/redhat; find . -print | cpio -pd "$destdir"/_TMP/root/rpmbuild >/dev/null 2>/dev/null)
 cp ${package}-${version}.tar.gz "$destdir"/_TMP/root/rpmbuild/SOURCES/
-rpmbuild --quiet --root "$destdir"/_TMP/root --define "%_topdir $destdir/_TMP/root/rpmbuild" -ba "$destdir"/_TMP/package.spec
+rpmbuild --quiet --buildroot "$destdir/_TMP/build" --define "_topdir $destdir/_TMP/root/rpmbuild" -ba "$destdir"/_TMP/package.spec
 test $? -eq 0 || fatal "package/rpm/make-package"
 
 cp -f "$destdir"/_TMP/root/rpmbuild/SRPMS/${package}-${version}-${releasenum}.src.rpm "${outdir}"
