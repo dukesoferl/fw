@@ -1,5 +1,6 @@
 Version 0.2.1 [ NYR ]
   * use --disable-hardcore for rpm source packages
+  * use eq not == in rpmvercmp
 
 Version 0.2.0
   * fix test-canonicalize-package, test-canonicalize-version, test-svn PATH

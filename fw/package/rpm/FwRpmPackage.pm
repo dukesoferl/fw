@@ -249,7 +249,7 @@ sub rpmvercmp ($$)
 {
   my ($a, $b) = @_;
 
-  return 0 if $a == $b;
+  return 0 if $a eq $b;
 
   my @aver = split /[^[:alnum]]/, $a;
   my @bver = split /[^[:alnum]]/, $b;
@@ -263,7 +263,7 @@ sub rpmvercmp ($$)
     {
       my $bv = shift @bver;
 
-      if ($av =~ /[^\d]/ || $bv =~ /[^\d]/)
+      if ($av =~ /\D/ || $bv =~ /\D/)
         {
           $cmp = ($av cmp $bv);
         }
