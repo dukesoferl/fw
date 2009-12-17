@@ -196,8 +196,7 @@ if test "\$1" -eq 1
   fi
 
 exit 0
-%post
-exit 0
+%post -p /sbin/ldconfig
 %preun
 set -e
 if test "\$1" -eq 0
@@ -228,6 +227,7 @@ _RPMEOF
     true
   fi
 
+/sbin/ldconfig
 exit 0
 %posttrans
 set -e
@@ -239,7 +239,7 @@ exit 0
 EOD
 # TODO: this is a bit dangerous because the files list might be architecture 
 # dependent
-    find "$destdir" -type f | \
+    find "$destdir" -type f -or -type l | \
     perl -ne 'BEGIN { $l = length shift @ARGV; };
               $s = substr ($_, $l);
               next unless $s =~ /\S/;
