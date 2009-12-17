@@ -1,3 +1,6 @@
+Version 0.2.1 [ NYR ]
+  * use --disable-hardcore for rpm source packages
+
 Version 0.2.0
   * fix test-canonicalize-package, test-canonicalize-version, test-svn PATH
   * rpm support

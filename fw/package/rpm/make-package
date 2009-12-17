@@ -154,7 +154,7 @@ $FW_PACKAGE_DESCRIPTION
 %build
 if [ -d "\$RPM_BUILD_ROOT" ]; then rm -rf "\$RPM_BUILD_ROOT"; fi
 mkdir -p "\$RPM_BUILD_ROOT"
-CFLAGS="\$RPM_OPT_FLAGS" ./build
+CFLAGS="\$RPM_OPT_FLAGS" ./build --disable-hardcore
 
 %install
 # TODO: ERROR ... using make breaks abstraction
