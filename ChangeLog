@@ -1,4 +1,4 @@
-Version 0.2.0 [ NYR ]
+Version 0.2.0
   * fix test-canonicalize-package, test-canonicalize-version, test-svn PATH
   * rpm support
 
