@@ -169,19 +169,19 @@ set +e
 rpm -q "$FW_PACKAGE_NAME" --queryformat '%{VERSION}' | grep -v 'not installed' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version
 set -e
 printf "%s" "$FW_PACKAGE_VERSION" > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".new_version
-cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst
+cat <<'_RPMEOF' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst
 $preinst
 _RPMEOF
 chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreinst
-cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostinst
+cat <<'_RPMEOF' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostinst
 $postinst
 _RPMEOF
 chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostinst
-cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreremove
+cat <<'_RPMEOF' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreremove
 $preremove
 _RPMEOF
 chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpreremove
-cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostremove
+cat <<'_RPMEOF' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostremove
 $postremove
 _RPMEOF
 chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostremove
@@ -201,7 +201,7 @@ exit 0
 set -e
 if test "\$1" -eq 0
   then
-    cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpreremove
+    cat <<'_RPMEOF' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpreremove
 $preremove
 _RPMEOF
     chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpreremove
@@ -216,7 +216,7 @@ exit 0
 set -e
 if test "\$1" -eq 0
   then
-    cat <<'_RPMEOF' >> \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpostremove
+    cat <<'_RPMEOF' > \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpostremove
 $postremove
 _RPMEOF
     chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpostremove
