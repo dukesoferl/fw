@@ -73,26 +73,17 @@ EOD
     chmod +x bootstrap || fatal "fw-init"
     fw_exec "revision/$revision/add-files" bootstrap || fatal "fw-init"
 
-    if test -z "$FW_PACKAGE_DEFAULT_MAINTAINER"
-      then
-        who=`whoami`
-        where=`hostname`
-        maintainer="${who} <${who}@$where>"
-      else
-        maintainer="$FW_PACKAGE_DEFAULT_MAINTAINER"
-      fi
-
     mkdir fw-pkgin || fatal "fw-init"
     fw_exec "revision/$revision/add-dir" fw-pkgin || fatal "fw-init"
     (
       cd fw-pkgin || exit 1
       cat <<EOD > config || exit 1
-# The FW_PACKAGE_MAINTAINER field is populated with the 
-# environment variable FW_PACKAGE_DEFAULT_MAINTAINER if non-empty
+# The FW_PACKAGE_MAINTAINER field is populated with the environment
+# variable FW_PACKAGE_DEFAULT_MAINTAINER if non-empty at init time
 
 FW_PACKAGE_NAME="$name"
 FW_PACKAGE_VERSION="0.0.0"
-FW_PACKAGE_MAINTAINER="$maintainer"
+FW_PACKAGE_MAINTAINER="${FW_PACKAGE_DEFAULT_MAINTAINER:="`whoami` <`whoami`@`hostname`>"}"
 FW_PACKAGE_SHORT_DESCRIPTION="A short description."
 FW_PACKAGE_DESCRIPTION=\`cat README\`
 FW_PACKAGE_ARCHITECTURE_DEPENDENT="1"
@@ -111,6 +102,34 @@ FW_PACKAGE_SUGGESTS=""
 
 FW_PACKAGE_BUILD_DEPENDS=""
 FW_PACKAGE_BUILD_CONFLICTS=""
+
+# dupload is used for submitting debian packages to a package archive
+# The FW_DUPLOAD_ARGS field is populated with the environment variable
+# FW_DEFAULT_DUPLOAD_ARGS if non-empty at init time
+
+FW_DUPLOAD_ARGS=\${FW_DUPLOAD_ARGS-"${FW_DEFAULT_DUPLOAD_ARGS:="-q"}"}
+
+# scp+createrepo is used for submitting rpm packages to a package archive
+# The FW_RPM_REPO_USER, FW_RPM_REPO_HOST, FW_RPM_REPO_BASEDIR,
+# and FW_RPM_POSTCREATEREPO_COMMANDS variables are populated with 
+# FW_RPM_REPO_USER_DEFAULT, FW_RPM_REPO_HOST_DEFAULT, 
+# FW_RPM_REPO_BASEDIR_DEFAULT, and FW_RPM_POSTCREATEREPO_COMMANDS_DEFAULT
+# respectively if non-empty at init time
+
+FW_RPM_REPO_USER=\${FW_RPM_REPO_USER-"${FW_RPM_REPO_USER_DEFAULT:=\`whoami\`}"}
+FW_RPM_REPO_HOST=\${FW_RPM_REPO_HOST-"${FW_RPM_REPO_HOST_DEFAULT:=localhost}"}
+FW_RPM_REPO_BASEDIR=\${FW_RPM_REPO_BASEDIR-"${FW_RPM_REPO_BASEDIR_DEFAULT}"}
+FW_RPM_CREATEREPO_ARGS=\${FW_RPM_CREATEREPO_ARGS-"${FW_RPM_CREATEREPO_ARGS_DEFAULT:="-q --database"}"}
+
+# this variable controls whether createrepo is run incrementally (--update).
+# possible settings are yes (always do it), no (never do it), and 
+# auto (do it if the repository has been previously initialized)
+FW_RPM_CREATEREPO_INCREMENTAL=\${FW_RPM_CREATEREPO_INCREMENTAL-"auto"}
+
+# these commands will be run after a successful createrepo run
+FW_RPM_POSTCREATEREPO_COMMANDS=\${FW_RPM_POSTCREATEREPO_COMMANDS-"${FW_RPM_POSTCREATEREPO_COMMANDS_DEFAULT:="true"}"}
+# here's a suggestion:
+# FW_RPM_POSTCREATEREPO_COMMANDS="gpg --detach-sign --armor repodata/repomd.xml" 
 EOD
 
       for x in post-install                           \
