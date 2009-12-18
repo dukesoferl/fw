@@ -10,7 +10,7 @@ dist_template_SCRIPTS =			\
   release-ok				\
   source-install
 
-install-data-hook:
+install-data-hook::
 	find "$(DESTDIR)$(templatedir)" -type f | xargs chmod -w
 
 noinst_DATA =				\

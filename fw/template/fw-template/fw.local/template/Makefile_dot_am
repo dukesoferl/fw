@@ -10,7 +10,7 @@ MAINTAINERCLEANFILES = 	\
 EXTRA_DIST =		\
   @FW_TEMPLATE_TEMPLATE_TYPE@
 
-dist-hook:
+dist-hook::
 	find "$(distdir)/@FW_TEMPLATE_TEMPLATE_TYPE@" -type d -name CVS | xargs rm -rf
 	rm -rf "$(distdir)/NAME"
 
