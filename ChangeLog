@@ -1,5 +1,12 @@
-Version 0.1.37 [ NYR ]
+Version 0.2.1
+  * use --disable-hardcore for rpm source packages
+  * use eq not == in rpmvercmp
+  * use '::' not ':' for Makefile rules to allow extensibility
+  * rpm automatically compresses man pages, adjust accordingly
+
+Version 0.2.0
   * fix test-canonicalize-package, test-canonicalize-version, test-svn PATH
+  * rpm support
 
 Version 0.1.36
   * move svn into fw base (here), so that fw can bootstrap from google code
