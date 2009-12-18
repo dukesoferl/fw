@@ -244,6 +244,7 @@ EOD
               $s = substr ($_, $l);
               next unless $s =~ /\S/;
               next if $s =~ m%^/?_TMP%;
+              $s =~ s%(/man\d/.*\.\d)%$1.gz%;
               print $s;' "$destdir" >> "$destdir"/_TMP/package.spec
 
     find "$destdir" -type d | \
