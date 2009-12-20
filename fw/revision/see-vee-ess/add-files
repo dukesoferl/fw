@@ -9,7 +9,7 @@ for x in "$@"
   do
     if test -f "$x"
       then
-        egrep "^/$x/" CVS/Entries >/dev/null 2>/dev/null || printf '"%s" ' "$x"
+        perl -ne 'BEGIN { $p = shift @ARGV; }; exit 0 if (m%^/\Q$p\E/%); } { print "\"$p\" ";' "$x" CVS/Entries
       fi
   done`
 

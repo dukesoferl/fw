@@ -4,7 +4,7 @@ test -z "${FW_TRACE}" || set -x
 
 touch .cvsignore
 
-egrep "^/.cvsignore/" CVS/Entries >/dev/null 2>/dev/null || \
+egrep "^/\.cvsignore/" CVS/Entries >/dev/null 2>/dev/null || \
 cvs -Q add .cvsignore
 
 (

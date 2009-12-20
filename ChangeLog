@@ -1,3 +1,6 @@
+Version 0.2.2 [ NYR ]
+  * quote metacharacters in cvs add
+
 Version 0.2.1
   * use --disable-hardcore for rpm source packages
   * use eq not == in rpmvercmp
