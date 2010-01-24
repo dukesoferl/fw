@@ -3,6 +3,7 @@ Version 0.2.2 [ NYR ]
   * fix libtoolize problem with latest autotools (AC_CONFIG_AUX_DIR)
   * cant use '::' with ac-init.generated b/c of am__aclocal_m4_deps :(
   * dpkg --print-installation-architecture is depricated
+  * latest versions of subversion client have different 'svn info' exit status
 
 Version 0.2.1
   * use --disable-hardcore for rpm source packages

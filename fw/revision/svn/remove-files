@@ -2,7 +2,7 @@
 
 test -z "${FW_TRACE}" || set -x
 
-svn info "$@" >/dev/null 2>/dev/null || exit 1
+which svn >/dev/null 2>/dev/null || exit 1
 
 files=`
   svn info "$@" 2>/dev/null |                                           \
