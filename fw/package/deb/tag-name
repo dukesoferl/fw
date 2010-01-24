@@ -42,7 +42,7 @@ version=`echo "$FW_PACKAGE_VERSION" | perl -pe 'chomp; s%\W%_%g;'`
 
 if test "$FW_PACKAGE_ARCHITECTURE_DEPENDENT" = "1"
   then
-    arch=`dpkg --print-installation-architecture`
+    arch=`dpkg --print-architecture`
   else
     arch="all"
   fi

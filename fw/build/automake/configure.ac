@@ -1,6 +1,7 @@
 sinclude([ac-init.generated])
 
 AM_INIT_AUTOMAKE([tar-ustar])
+AC_CONFIG_AUX_DIR([.]) 
 
 AM_MAINTAINER_MODE
 

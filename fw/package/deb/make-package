@@ -148,7 +148,7 @@ version=`fw-exec package/deb/canonicalize-version "${FW_PACKAGE_VERSION}"` || fa
 
 if test "$FW_PACKAGE_ARCHITECTURE_DEPENDENT" = "1"
   then
-    arch=`dpkg --print-installation-architecture`
+    arch=`dpkg --print-architecture`
   else
     arch="all"
   fi

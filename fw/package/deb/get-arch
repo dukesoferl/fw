@@ -40,7 +40,7 @@ eval `fw_exec "template/$template/load-config"`
 
 if test "$FW_PACKAGE_ARCHITECTURE_DEPENDENT" = "1" || test -n "$build"
   then
-    arch=`dpkg --print-installation-architecture`
+    arch=`dpkg --print-architecture`
   else
     arch="all"
   fi

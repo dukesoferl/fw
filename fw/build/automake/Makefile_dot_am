@@ -26,7 +26,7 @@ release:: release-@FW_NATIVE_PACKAGE_TYPE@
 source_install:: source_install-@FW_NATIVE_PACKAGE_TYPE@
 endif
 
-ac-init.generated:: fw-pkgin/config
+ac-init.generated: fw-pkgin/config
 	@./bootstrap --revision "@FW_REVISION_TYPE@"
 
 create-package:: bootstrap

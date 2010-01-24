@@ -1,5 +1,8 @@
-Version 0.2.2 [ NYR ]
+Version 0.2.2 
   * quote metacharacters in cvs add
+  * fix libtoolize problem with latest autotools (AC_CONFIG_AUX_DIR)
+  * cant use '::' with ac-init.generated b/c of am__aclocal_m4_deps :(
+  * dpkg --print-installation-architecture is depricated
 
 Version 0.2.1
   * use --disable-hardcore for rpm source packages

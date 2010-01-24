@@ -69,7 +69,7 @@ eval `fw_exec "template/$template/load-config"`
 package=`fw-exec package/deb/canonicalize-package "${FW_PACKAGE_NAME}"` || fatal package/deb/make-build-package
 version=`fw-exec package/deb/canonicalize-version "${FW_PACKAGE_VERSION}"` || fatal package/deb/make-build-package
 
-arch=`dpkg --print-installation-architecture`
+arch=`dpkg --print-architecture`
 
 test "$release" = yes || version="${version}-TEST1"
 
