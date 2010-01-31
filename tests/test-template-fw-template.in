@@ -15,6 +15,7 @@ cd tmp
 test -h fw.local || ln -sf ../fw.local fw.local || exit 1
 ./bootstrap || exit 1
 ./build || exit 1
+"@GMAKE@" -s check || exit 1
 
 "@GMAKE@" -s maintainer-clean
 test -z "`find . -name '*.am'`" || exit 1
