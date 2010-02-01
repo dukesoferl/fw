@@ -1,8 +1,7 @@
-FEATURE: support refering to installed version in a dependency specification
+FEATURE: use 4th argument to AC_INIT (package tarname)
 audit: parsing routines assume fw-pkgin/config vars have quotes around their values
 SOFT BUILD
 add upper bound in generated range dependency
-BUG: test-template.in that's installed with fw-template doesn't change build deps so can't pass unless already installed
 BUG: stick share/fw dir (as share/) into fw/ when make dist
 BUG: --name=value becomes name=value= in parse-args.sh
 BUG: need dep on build-essential (or something: make wasn't installed)
