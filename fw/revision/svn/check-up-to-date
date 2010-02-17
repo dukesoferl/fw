@@ -21,7 +21,7 @@ svn status > /dev/null || {
   fatal "revision/svn/check-up-to-date"
 }
 
-if svn status | grep -e '^[ACDMX\?\!\~]'
+if svn status | grep -e '^[ACDM\?\!\~]'
   then
     exit 1
   else
