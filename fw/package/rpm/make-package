@@ -208,7 +208,7 @@ _RPMEOF
 
     \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpreremove remove
   else
-    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostremove failed-upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".new_version\`"
+    \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostremove failed-upgrade "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`"
   fi
 
 exit 0
