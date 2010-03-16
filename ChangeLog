@@ -1,6 +1,7 @@
 Version 0.2.5
   * when upgrading rpms, the wrong version was being passed to newpostremove,
     need to pass old version not new version for upgrades to work
+  * rpm provides were mislabeled as conflicts so causing issues
 
 Version 0.2.4
   * remove X from svn check-up-to-date

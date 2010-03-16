@@ -74,9 +74,9 @@ make_spec_file () \
 
     if test "x$provides" = x
       then
-        providestag="#Conflicts:"
+        providestag="#Provides:"
       else
-        providestag="Conflicts: $provides"
+        providestag="Provides: $provides"
       fi
 
     mkdir "$destdir"/_TMP || fatal "package/rpm/make-package"
