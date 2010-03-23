@@ -45,7 +45,9 @@ make_spec_file () \
       else
         depends=`fw_exec "package/rpm/dependency-range"             \
                          "$FW_PACKAGE_DEPENDS" |                    \
-                 perl -pe 's/[\(\)]//g; s/>>/>/g; s/<</</g;'`
+                 perl -pe 's/\((\s*[<=>][^)]+)\)/ \1/g ;
+                           s/>>/>/g ;
+                           s/<</</g'`
       fi
 
     if test "x$depends" = x
@@ -55,8 +57,7 @@ make_spec_file () \
         dependstag="Requires: $depends"
       fi
 
-    conflicts=`perl -e '$ARGV[0] =~ s/[\(\)]//g; s/>>/>/g; s/<</</g; 
-                        print $ARGV[0];' "$FW_PACKAGE_CONFLICTS"`
+    conflicts=`perl -le '$ARGV[0] =~ s/\((\s*[<=>][^)]+)\)/ \1/g ; $ARGV[0] =~ s/>>/>/g; $ARGV[0] =~ s/<</</g ; $ARGV[0] =~ s/\s\s/ /g; $ARGV[0] =~ s/,(\S)/, \1/g; print $ARGV[0]' "$FW_PACKAGE_CONFLICTS"`
 
     test $? -eq 0 || fatal "package/rpm/make-package"
 
@@ -67,8 +68,7 @@ make_spec_file () \
         conflictstag="Conflicts: $conflicts"
       fi
 
-    provides=`perl -e '$ARGV[0] =~ s/[\(\)]//g; s/>>/>/g; s/<</</g; 
-                        print $ARGV[0];' "$FW_PACKAGE_PROVIDES"`
+    provides=`perl -le '$ARGV[0] =~ s/\((\s*[<=>][^)]+)\)/ \1/g ; $ARGV[0] =~ s/>>/>/g; $ARGV[0] =~ s/<</</g ; $ARGV[0] =~ s/\s\s/ /g; $ARGV[0] =~ s/,(\S)/, \1/g; print $ARGV[0]' "$FW_PACKAGE_PROVIDES"`
 
     test $? -eq 0 || fatal "package/rpm/make-package"
 
@@ -128,6 +128,10 @@ make_spec_file () \
       fi
 
     cat <<EOD > "$destdir"/_TMP/package.spec
+# redhat tends to make -debuginfo packages which framewerk doesn't know
+# how to deal with, so we'll just turn them off
+%define debug_package %{nil}
+
 Summary: $FW_PACKAGE_SHORT_DESCRIPTION
 Name: ${package}
 Version: $version
