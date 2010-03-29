@@ -47,7 +47,7 @@ sub parse_depends_range ($$)
             my $rawv = defined ($4) ? $4 : "";
             my $version = ($rawv eq "INSTALLED") ? $state->{$p} : $rawv;
 
-            next OPTION unless exists $state->{$p};
+#            next OPTION unless exists $state->{$p};
 
             if (   defined ($op) && $op ne "" 
                 && defined ($version) && $version ne "")
@@ -56,7 +56,24 @@ sub parse_depends_range ($$)
               }
             else
               {
-                print "$p (>= $state->{$p})";
+#                print "$p (>= $state->{$p})";
+                if ($state->{$p})
+                  {
+                    print "$p (>= $state->{$p})";
+                  }
+# TODO: what about reverse provides (?)
+                elsif (my $rev_p = reverse_provides ($state, $p))
+                  {
+                    print "$rev_p (>= $state->{$rev_p})";
+                  }
+                elsif ($rawv eq "INSTALLED")
+                  {
+                    print $p;
+                  }
+                else
+                  {
+                    next OPTION;
+                  }
               }
 
             next SPEC;

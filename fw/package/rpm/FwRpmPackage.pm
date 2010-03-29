@@ -235,7 +235,17 @@ sub get_dependencies_closure ($$$$@)
 
 sub reverse_provides ($$)
   {
-    return undef;
+    my ($state, $package) = @_;
+    my $reverse_provider;
+
+    my $cmd = "rpm -q --whatprovides "
+             ."--queryformat '%-{name} %{version}-%{release}\n' "
+             .$package;
+    my $provides = `$cmd`;
+    $provides =~ m/^(\S+) / or die "unexpected rpm output: $provides";
+    $reverse_provider = $1 if $state->{$1};
+
+    return $reverse_provider;
   }
 
 #---------------------------------------------------------------------
@@ -375,18 +385,18 @@ sub parse_depends ($$$$)
                     next SPEC;
                   }
               }
-#            else 
-#              {
-#                my $rev_p = reverse_provides ($state, $p);
-#
-#                if ($rev_p && enforce_op ($op, $state->{$rev_p}, $version))
-#                  {
-#                    $packages{$rev_p} = 
-#                      (defined ($op) && $op ne "") ? "$op $version"
-#                                                   : ">= $state->{$rev_p}";
-#                    next SPEC;
-#                  }
-#              }
+            else
+              {
+                my $rev_p = reverse_provides ($state, $p);
+
+                if ($rev_p && enforce_op ($op, $state->{$rev_p}, $version))
+                  {
+                    $packages{$rev_p} =
+                      (defined ($op) && $op ne "") ? "$op $version"
+                                                   : ">= $state->{$rev_p}";
+                    next SPEC;
+                  }
+              }
           }
 
         die "package/rpm/dependency-closure: fatal: '$spec' not installed\n" 
