@@ -1,3 +1,8 @@
+Version 0.2.8
+  * when installing multiple packages with the same prefix, the %posttrans
+    for the first package would remove files for the second resulting in
+    errors, so be a little be more precise in what gets removed
+
 Version 0.2.7
   * rpm reverse_provides was unimplemented, providing an implementation
 

@@ -226,7 +226,7 @@ _RPMEOF
     chmod +x \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpostremove
 
     \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".oldpostremove remove
-    rm -f \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME"*
+    rm -f \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".*
   else
     true
   fi
@@ -236,7 +236,7 @@ exit 0
 %posttrans
 set -e
 \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".newpostinst configure "\`cat \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".old_version\`"
-rm -f \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME"*
+rm -f \${TMPDIR:=/tmp}/."$FW_PACKAGE_NAME".*
 exit 0
 %files
 %defattr(-,root,root,-)
