@@ -6,7 +6,7 @@ dist_fwscripttests_DATA = 		\
   testmyscript
 
 install-data-hook:
-	find "$(DESTDIR)$(fwautomakedir)" -type f | xargs chmod -w
+	find "$(DESTDIR)$(fwscripttestsdir)" -type f | xargs chmod -w
 
 MAINTAINERCLEANFILES = Makefile.in
 
