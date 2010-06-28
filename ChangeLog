@@ -1,3 +1,8 @@
+Version 0.2.9
+  * For whatever reason 'make install' was failing, well okay the reason was
+    the variable for the directory to install some things was wrong, however
+    it still seemed to build rpms fine, so I didn't catch it.
+
 Version 0.2.8
   * when installing multiple packages with the same prefix, the %posttrans
     for the first package would remove files for the second resulting in

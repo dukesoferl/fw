@@ -6,7 +6,7 @@ dist_fwscriptbin_DATA = 		\
   myscript
 
 install-data-hook:
-	find "$(DESTDIR)$(fwautomakedir)" -type f | xargs chmod -w
+	find "$(DESTDIR)$(fwscriptbindir)" -type f | xargs chmod -w
 
 MAINTAINERCLEANFILES = 			\
   Makefile.in
