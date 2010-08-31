@@ -1,3 +1,7 @@
+Version 0.2.10
+  * Wrong license, the web page claimed new BSD, the distro had GPLv2, I talk
+    to Paul and he wanted new BSD, so this has that license.
+
 Version 0.2.9
   * For whatever reason 'make install' was failing, well okay the reason was
     the variable for the directory to install some things was wrong, however
