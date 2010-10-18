@@ -30,7 +30,7 @@ rpm_compare () {
       {
         my (\$a, \$b) = @_;
 
-        return 0 if \$a == \$b;
+        return 0 if \$a eq \$b;
 
         my @aver = split /[^[:alnum]]/, \$a;
         my @bver = split /[^[:alnum]]/, \$b;

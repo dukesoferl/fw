@@ -1,26 +1,30 @@
-Version 0.2.10
+Version 0.2.11 (molinaro)
+  * rpm version comparison was using '==' to compare 2 strings which led to
+    silent errors.
+
+Version 0.2.10 (molinaro)
   * Wrong license, the web page claimed new BSD, the distro had GPLv2, I talk
     to Paul and he wanted new BSD, so this has that license.
 
-Version 0.2.9
+Version 0.2.9 (molinaro)
   * For whatever reason 'make install' was failing, well okay the reason was
     the variable for the directory to install some things was wrong, however
     it still seemed to build rpms fine, so I didn't catch it.
 
-Version 0.2.8
+Version 0.2.8 (molinaro)
   * when installing multiple packages with the same prefix, the %posttrans
     for the first package would remove files for the second resulting in
     errors, so be a little be more precise in what gets removed
 
-Version 0.2.7
+Version 0.2.7 (molinaro)
   * rpm reverse_provides was unimplemented, providing an implementation
 
-Version 0.2.6
+Version 0.2.6 (molinaro)
   * Allow parens in package lists for provides and conflicts
   * turn off debuginfo packages when building rpms on redhat, framewerk does
     not deal with them correctly
 
-Version 0.2.5
+Version 0.2.5 (molinaro)
   * when upgrading rpms, the wrong version was being passed to newpostremove,
     need to pass old version not new version for upgrades to work
   * rpm provides were mislabeled as conflicts so causing issues
