@@ -43,7 +43,7 @@ fw-init --name tmp                                              \
         --revision svn                                          \
         --svn_project_path "file://`pwd`/svntmp/tmp/trunk"      \
         --svn_tag_root "file://`pwd`/svntmp/tmp/tags"           \
-        --template script      || exit 1
+        --template script --trace     || exit 1
 cd tmp
 ( svn status | grep '^?' ) && exit 1
 ./bootstrap || exit 1

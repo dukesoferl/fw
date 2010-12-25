@@ -1,0 +1,14 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                               detect                                
+# 
+# Check and see whether the current directory is subject to this
+# type of revision control.
+#---------------------------------------------------------------------
+
+test -z "${FW_TRACE}" || set -x
+
+which git >/dev/null 2>/dev/null || exit 1
+
+git status >/dev/null 2>/dev/null

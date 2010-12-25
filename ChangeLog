@@ -1,3 +1,6 @@
+Version 0.3.0 (molinaro)
+  * git added as a revision system
+
 Version 0.2.11 (molinaro)
   * rpm version comparison was using '==' to compare 2 strings which led to
     silent errors.
