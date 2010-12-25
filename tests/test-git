@@ -1,0 +1,48 @@
+#! /bin/sh
+
+PATH="`pwd`/../bin:$PATH"
+export PATH
+
+if test -z "$MAKE"
+  then
+    gmake=`which gmake`
+
+    if test $? = 0 
+      then
+        MAKE=gmake
+      else
+        MAKE=make
+      fi
+  fi
+
+git=`which git`
+
+if test -z "$git"
+  then
+    echo "error: can't find git, tests will not work!" 1>&2
+    exit 77
+  fi
+
+(
+set -x
+test -h share || ln -sf .. share || exit 1
+rm -rf tmp
+FW_ROOT=`pwd`
+export FW_ROOT
+fw-init --name tmp                                    \
+        --revision git                                \
+        --template script || exit 1
+cd tmp
+( git status | grep '^# Untracked files:' ) && exit 1
+./bootstrap || exit 1
+( git status | grep '^# Untracked files:' ) && exit 1
+./build || exit 1
+"$MAKE" -s check || exit 1
+( git status | grep '^# Untracked files:' ) && exit 1
+"$MAKE" -s maintainer-clean
+( git status | grep '^# Untracked files:' ) && exit 1
+test -z "`find . -name '*.am'`" || exit 1
+) > test-git.out 2>&1 || exit 1
+
+rm -rf tmp || exit 1
+rm share || exit 1
