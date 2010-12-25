@@ -1,4 +1,4 @@
-SUBDIRS = none see-vee-ess svn
+SUBDIRS = none see-vee-ess svn git
 
 MAINTAINERCLEANFILES = Makefile.in
 
