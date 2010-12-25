@@ -1,3 +1,7 @@
+Version 0.3.1 (molinaro)
+  * couldn't test release without proper framewerk, then there was a problem
+with the git detect script, release should properly tag and work now
+
 Version 0.3.0 (molinaro)
   * git added as a revision system
 

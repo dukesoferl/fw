@@ -9,6 +9,4 @@
 
 test -z "${FW_TRACE}" || set -x
 
-which git >/dev/null 2>/dev/null || exit 1
-
-git status >/dev/null 2>/dev/null
+test -d .git
