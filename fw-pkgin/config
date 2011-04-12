@@ -2,7 +2,7 @@
 # environment variable FW_PACKAGE_DEFAULT_MAINTAINER if non-empty
 
 FW_PACKAGE_NAME="framewerk"
-FW_PACKAGE_VERSION="0.3.1"
+FW_PACKAGE_VERSION="0.3.2"
 FW_PACKAGE_MAINTAINER="Paul Mineiro <paul-fw@mineiro.com>"
 FW_PACKAGE_SHORT_DESCRIPTION="A extensible development environment."
 FW_PACKAGE_DESCRIPTION=`cat README`
@@ -14,13 +14,13 @@ FW_PACKAGE_ARCHITECTURE_DEPENDENT="0"
 # 
 # For other packaging systems, the syntax is translated for you.
 
-FW_PACKAGE_DEPENDS="automake, autoconf2.5 | autoconf (>= 2.5), make | fink (>= 0.0.0)"
+FW_PACKAGE_DEPENDS="automake | fink (>= 0.0.0), autoconf (>= 2.5) | autoconf2.5 | autoconf2.6 | fink (>= 0.0.0), make | fink (>= 0.0.0)" 
 FW_PACKAGE_CONFLICTS=""
 FW_PACKAGE_PROVIDES=""
 FW_PACKAGE_REPLACES=""
 FW_PACKAGE_SUGGESTS="dupload, fakeroot"
 
-FW_PACKAGE_BUILD_DEPENDS="automake, autoconf2.5 [darwin-i386], autoconf [!darwin-i386], make [!darwin-i386]"
+FW_PACKAGE_BUILD_DEPENDS="automake | fink, autoconf | autoconf2.5 | autoconf2.6 | fink, make | fink"
 FW_PACKAGE_BUILD_CONFLICTS=""
 
 FW_SUBVERSION_TAG_ROOT="https://fwtemplates.googlecode.com/svn/tags/fw"

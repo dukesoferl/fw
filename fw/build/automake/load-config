@@ -50,4 +50,4 @@ cat fw-pkgin/config                                             |       \
                   print;
                 }'                                              |       \
     perl -pe 's/"\s+([\w|"])/"$1/g;'                            |       \
-perl -lpe 'chomp; s%FW_PACKAGE_BUILD_DEPENDS="(.*)"%FW_PACKAGE_BUILD_DEPENDS="automake, autoconf [!darwin-i386], autoconf2.5 [darwin-i386], framewerk, $1"%; s%, "%"%; s%#(.*)%%;'
+perl -lpe 'chomp; s%FW_PACKAGE_BUILD_DEPENDS="(.*)"%FW_PACKAGE_BUILD_DEPENDS="framewerk, $1"%; s%, "%"%; s%#(.*)%%;'

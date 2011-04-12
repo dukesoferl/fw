@@ -1,3 +1,6 @@
+Version 0.3.2 [NYR]
+  * some tweaks to build on later os/x
+
 Version 0.3.1 (molinaro)
   * couldn't test release without proper framewerk, then there was a problem
 with the git detect script, release should properly tag and work now
