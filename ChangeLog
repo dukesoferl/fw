@@ -1,3 +1,10 @@
+Version 0.3.3
+  * adjust for newer svn client behaviour difference
+     (latest versions want to delete the local file, therefore
+      REVISION/remove-files will have new semantics, namely, 
+      deleting the file from the local filesystem; adjust
+      see-vee-ess and none accordingly)
+
 Version 0.3.2
   * some tweaks to build on later os/x
 

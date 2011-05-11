@@ -2,7 +2,7 @@
 # environment variable FW_PACKAGE_DEFAULT_MAINTAINER if non-empty
 
 FW_PACKAGE_NAME="framewerk"
-FW_PACKAGE_VERSION="0.3.2"
+FW_PACKAGE_VERSION="0.3.3"
 FW_PACKAGE_MAINTAINER="Paul Mineiro <paul-fw@mineiro.com>"
 FW_PACKAGE_SHORT_DESCRIPTION="A extensible development environment."
 FW_PACKAGE_DESCRIPTION=`cat README`
@@ -29,7 +29,7 @@ FW_SUBVERSION_TAG_ROOT="https://fwtemplates.googlecode.com/svn/tags/fw"
 # The FW_DUPLOAD_ARGS field is populated with the environment variable
 # FW_DEFAULT_DUPLOAD_ARGS if non-empty at init time
 
-FW_DUPLOAD_ARGS=${FW_DUPLOAD_ARGS-"-t dukeshardy"}
+FW_DUPLOAD_ARGS=${FW_DUPLOAD_ARGS-"-t dukeslucid"}
 
 # scp+createrepo is used for submitting rpm packages to a package archive
 # The FW_RPM_REPO_USER, FW_RPM_REPO_HOST, FW_RPM_REPO_BASEDIR,
