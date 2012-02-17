@@ -1,3 +1,6 @@
+Version 0.3.4
+  * add --ignore-unmatch to revision/git/remove-files
+
 Version 0.3.3
   * adjust for newer svn client behaviour difference
      (latest versions want to delete the local file, therefore
