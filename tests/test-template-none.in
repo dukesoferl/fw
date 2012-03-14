@@ -1,0 +1,25 @@
+#! /bin/sh
+
+PATH="`pwd`/../bin:$PATH"
+export PATH
+
+(
+set -x
+test -h share || ln -sf .. share || exit 1
+rm -rf tmp 
+FW_ROOT=`pwd` fw-init --name tmp                              \
+                      --revision none                         \
+                      --localize 1                            \
+                      --template none                         || exit 1
+cd tmp
+test -h fw.local || ln -sf ../fw.local fw.local || exit 1
+./bootstrap || exit 1
+./build || exit 1
+"@GMAKE@" -s check || exit 1
+
+"@GMAKE@" -s maintainer-clean
+test -z "`find . -name '*.am' -and -not -path './fw.local/*'`" || exit 1
+) > test-template-none.out 2>&1 || exit 1
+
+rm share
+rm -rf tmp

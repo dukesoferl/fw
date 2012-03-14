@@ -25,6 +25,7 @@ AC_CONFIG_FILES([fw/Makefile
                  fw/template/fw-template/fw.local/template/Makefile
                  fw/template/fw-template/fw.local/template/NAME/Makefile
                  fw/template/fw-template/tests/Makefile
+                 fw/template/none/Makefile
                  fw/template/script/Makefile
                  fw/template/script/bin/Makefile
                  fw/template/script/tests/Makefile
@@ -49,6 +50,9 @@ AC_CONFIG_FILES([tests/test-template-fw-template],
 
 AC_CONFIG_FILES([tests/test-template-script],
                 [chmod +x tests/test-template-script])
+
+AC_CONFIG_FILES([tests/test-template-none],
+                [chmod +x tests/test-template-none])
 
 AC_PATH_PROG([GMAKE], [gmake], [make])
 

@@ -6,6 +6,7 @@ check_SCRIPTS = 			\
   test-template-fw-build		\
   test-template-fw-template		\
   test-template-script			\
+  test-template-none		\
   test-cvs				\
   test-svn \
   test-git
@@ -16,6 +17,7 @@ CLEANFILES += 				\
   test-template-fw-build.out		\
   test-template-fw-template.out		\
   test-template-script.out		\
+  test-template-none.out		\
   test-cvs.out				\
   test-svn.out \
   test-git.out
@@ -24,7 +26,8 @@ MAINTAINERCLEANFILES += 		\
   share					\
   test-template-fw-build		\
   test-template-fw-template		\
-  test-template-script
+  test-template-script	\
+  test-template-none
 
 maintainer-clean-local:
 	rm -rf tmp

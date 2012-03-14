@@ -1,4 +1,4 @@
-SUBDIRS = fw-build fw-template script
+SUBDIRS = fw-build fw-template script none
 
 MAINTAINERCLEANFILES = Makefile.in
 

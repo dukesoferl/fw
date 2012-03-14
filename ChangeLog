@@ -1,3 +1,10 @@
+Version 0.4.0
+  * add none as a template type, the none template is even more minimal than
+  script, it does not contain tests or src directory and is mostly useful for
+  packaging config files or for cases where you want autotools but no initial
+  layout
+  * fix rpm errors caused by changes in version 0.3.2
+
 Version 0.3.4
   * add --ignore-unmatch to revision/git/remove-files
 
