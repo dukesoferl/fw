@@ -25,6 +25,6 @@ newignore=`
 ( 
   svn propget svn:ignore .
   for x in "$@"; do echo "$x"; done
-) | sort | uniq`
+) | LANG=C sort | uniq`
 
 svn propset svn:ignore "$newignore" . > /dev/null

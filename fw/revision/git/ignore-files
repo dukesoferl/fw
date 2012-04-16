@@ -23,6 +23,6 @@ git add .gitignore
 (
   cat .gitignore
   for x in "$@"; do echo "$x"; done
-) | sort | uniq > .gitignore_new
+) | LANG=C sort | uniq > .gitignore_new
 
 mv -f .gitignore_new .gitignore
