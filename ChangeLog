@@ -1,3 +1,6 @@
+Version 0.4.2
+  * Correctly escape blank lines in Description field of debian control file
+
 Version 0.4.1
   * consistent sort for ignore-files
 

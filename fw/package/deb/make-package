@@ -72,7 +72,7 @@ make_control_files () \
     mkdir "$destdir"/DEBIAN || fatal "package/deb/make-package"
     chmod 755 "$destdir"/DEBIAN || fatal "package/deb/make-package"
 
-    description=`echo "$FW_PACKAGE_DESCRIPTION" | perl -ne 'print " $_";'`
+    description=`echo "$FW_PACKAGE_DESCRIPTION" | perl -ne 's/^$/./; print " $_";'`
 
     priority=${FW_PACKAGE_PRIORITY:-"Optional"}
 
