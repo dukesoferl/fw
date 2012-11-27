@@ -1,0 +1,20 @@
+#! /usr/bin/perl
+
+use File::Basename;
+
+BEGIN {
+  unshift @INC, dirname ($0);
+};
+
+use FwRpmPackage;
+use strict;
+
+my $usage = "package/rpm/rpm-version-compare: fatal: usage $0 version1 version2\n";
+
+defined ($ARGV[0]) or die $usage;
+my $ver1 = $ARGV[0];
+
+defined ($ARGV[1]) or die $usage;
+my $ver2 = $ARGV[1];
+
+print rpmvercmp ($ver1, $ver2)."\n";

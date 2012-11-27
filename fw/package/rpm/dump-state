@@ -1,0 +1,19 @@
+#! /usr/bin/perl
+
+use File::Basename;
+
+BEGIN {
+  unshift @INC, dirname ($0);
+};
+
+use FwRpmPackage;
+use strict;
+
+my $usage = "package/rpm/dump-state: fatal: usage $0\n";
+
+my ($state, undef) = get_state ();
+
+foreach my $package (sort keys %{$state}) {
+    print $package."\t".$state->{$package}."\n";
+}
+0;
