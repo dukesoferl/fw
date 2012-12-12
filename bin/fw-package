@@ -66,6 +66,8 @@ check_for_tag () \
           echo "fw-package: error: cannot release package in this state" 1>&2
           fatal "fw-package"
         }
+      else
+        echo "fw-package: allowing release since FW_SKIP_TAG is set" 1>&2
       fi
     }
   }
@@ -183,6 +185,8 @@ if test "x$source_install_only" = x
     
     if test -z "$FW_SKIP_TAG" ; then
       make_tag "$@" --tag "$tag"
+    else
+      echo "fw-package: skip making tag since FW_SKIP_TAG is set" 1>&2
     fi
     
     release_package "$@" --outdir "$outdir"
