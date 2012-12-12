@@ -1,3 +1,7 @@
+Version 0.5.0
+  * if environment variable FW_SKIP_TAG is non-empty then allow release to
+  release an already tagged source tree
+
 Version 0.4.3
   * fix issues with rpm build packages
 

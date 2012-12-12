@@ -61,10 +61,12 @@ check_for_tag () \
     fw_exec "revision/$revision/check-for-tag" "$@" --tag "$tag" || {
       echo "fw-package: warning: tag '$tag' already exists" 1>&2
       echo "fw-package: warning: probably this package has already been released" 1>&2
-      test "$release" != yes || {
-        echo "fw-package: error: cannot release package in this state" 1>&2
-        fatal "fw-package"
-      }
+      if test -z "$FW_SKIP_TAG" ; then
+        test "$release" != yes || {
+          echo "fw-package: error: cannot release package in this state" 1>&2
+          fatal "fw-package"
+        }
+      fi
     }
   }
 
@@ -179,7 +181,9 @@ if test "x$source_install_only" = x
     
     test ! -d fw-pkgtmp || rm -rf fw-pkgtmp || fatal "fw-package"
     
-    make_tag "$@" --tag "$tag"
+    if test -z "$FW_SKIP_TAG" ; then
+      make_tag "$@" --tag "$tag"
+    fi
     
     release_package "$@" --outdir "$outdir"
   fi
