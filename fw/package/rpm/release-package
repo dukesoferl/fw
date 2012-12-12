@@ -32,7 +32,7 @@ parse_args "package/rpm/make-package" "$@"
 validate_args "package/rpm/make-package" "outdir template" "template"
 
 which rpm > /dev/null 2>/dev/null || {
-  echo "rpm/release-package: error: dupload not installed" 1>&2
+  echo "rpm/release-package: error: rpm not installed" 1>&2
   fatal "rpm/release-package"
 }
 
