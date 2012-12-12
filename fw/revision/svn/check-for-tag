@@ -14,7 +14,7 @@ test -f "${FW_ROOT}/share/fw/sh/fw-find.sh" && fws="${FW_ROOT}/share/fw/sh/fw-fi
 test -f "fw/sh/fw-find.sh" && fws="fw/sh/fw-find.sh"
 test -f "fw.local/sh/fw-find.sh" && fws="fw.local/sh/fw-find.sh"
 test ! -z "$fws" || {
-  echo "revision/cvs/check-for-tag: fatal: can't locate fw-find.sh" 1>&2
+  echo "revision/svn/check-for-tag: fatal: can't locate fw-find.sh" 1>&2
   exit 1
 }
 
@@ -24,17 +24,17 @@ test ! -z "$fws" || {
 #                              routines                               
 #---------------------------------------------------------------------
 
-fw_source "revision/cvs/check-for-tag" "sh/fatal.sh"
-fw_source "revision/cvs/check-for-tag" "sh/parse-args.sh"
-fw_source "revision/cvs/check-for-tag" "sh/validate-args.sh"
+fw_source "revision/svn/check-for-tag" "sh/fatal.sh"
+fw_source "revision/svn/check-for-tag" "sh/parse-args.sh"
+fw_source "revision/svn/check-for-tag" "sh/validate-args.sh"
 
 #---------------------------------------------------------------------
 #                                main                                 
 #---------------------------------------------------------------------
 
-parse_args "revision/cvs/check-for-tag" "$@"
+parse_args "revision/svn/check-for-tag" "$@"
 
-validate_args "revision/cvs/check-for-tag" "tag" ""
+validate_args "revision/svn/check-for-tag" "tag" ""
 
 eval `fw-exec "template/$template/load-config"`
 

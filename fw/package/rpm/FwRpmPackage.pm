@@ -15,7 +15,7 @@ BEGIN {
    @ISA         = qw (Exporter);
    @EXPORT      = qw (&proctalk &get_state &get_dependencies &closure
                       &get_dependencies_closure 
-                      &reverse_provides &parse_depends);
+                      &reverse_provides &parse_depends &rpmvercmp);
    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
    # your exported package globals go here,
@@ -91,7 +91,10 @@ sub get_state ()
               chomp;
 
               my ($package, $version) = split /\s+/, $_, 2;
-
+              if ($version =~ m/^\(none\):(.*)$/)
+                {
+                  $version = "$1";
+                }
               $state{$package} = $version;
             }
         },
@@ -110,7 +113,7 @@ sub get_state ()
           exec "rpm",
                "-qa",
                '--queryformat',
-               '%-{name}\t%{version}-%{release}\n';
+               '%-{name}\t%{epoch}:%{version}-%{release}\n';
         }
     );
 
