@@ -189,5 +189,9 @@ if test "x$source_install_only" = x
       echo "fw-package: skip making tag since FW_SKIP_TAG is set" 1>&2
     fi
     
-    release_package "$@" --outdir "$outdir"
+    if test -z "$FW_SKIP_RELEASE" ; then
+      release_package "$@" --outdir "$outdir"
+    else
+      echo "fw-package: skip release since FW_SKIP_RELEASE is set" 1>&2
+    fi
   fi

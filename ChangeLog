@@ -1,6 +1,8 @@
 Version 0.5.0
   * if environment variable FW_SKIP_TAG is non-empty then allow release to
   release an already tagged source tree
+  * if environment variable FW_SKIP_RELEASE is non-empty then don't release to
+  repo, just build release rpms locally
 
 Version 0.4.3
   * fix issues with rpm build packages
