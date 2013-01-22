@@ -1,0 +1,5 @@
+Makefile
+Makefile.in
+Makefile.am
+.*.script_ok
+fw-init
