@@ -41,6 +41,9 @@ make_spec_file () \
     chmod 755 "$destdir"/_TMP || fatal "package/rpm/make-build-package"
 
     cat <<EOD > "$destdir"/_TMP/package.spec
+# we don't need to do any compression or other garbage for build
+# package so disable them all
+%global __os_install_post %{nil}
 Summary: Build environment for $package $version.
 Name: ${package}_build
 Version: $version
@@ -106,11 +109,10 @@ if test "x$release" = xyes
 
 make_spec_file
 
-mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S}
-mkdir -p "$destdir"/_TMP/root/var/tmp
-mkdir -p "$destdir"/_TMP/root/"$destdir"/_TMP
+mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S}  || fatal "package/rpm/make-build-package"
+mkdir -p "$destdir"/_TMP/root/var/tmp  || fatal "package/rpm/make-build-package"
+mkdir -p "$destdir"/_TMP/root/"$destdir"/_TMP  || fatal "package/rpm/make-build-package"
 ln -s "$destdir"/_TMP/root "$destdir"/_TMP/root/"$destdir"/_TMP/root
-(cd /usr/src/redhat; find . -print | cpio -pd "$destdir"/_TMP/root/rpmbuild >/dev/null 2>/dev/null)
 rpmbuild --quiet --root "$destdir"/_TMP/root --define "%_topdir $destdir/_TMP/root/rpmbuild" -bb "$destdir"/_TMP/package.spec
 test $? -eq 0 || fatal "package/rpm/make-build-package"
 

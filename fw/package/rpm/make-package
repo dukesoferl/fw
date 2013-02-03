@@ -311,8 +311,7 @@ make_spec_file
 
 make -s dist || fatal "package/rpm/make-package"
 
-mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S}
-(cd /usr/src/redhat; find . -print | cpio -pd "$destdir"/_TMP/root/rpmbuild >/dev/null 2>/dev/null)
+mkdir -p "$destdir"/_TMP/root/rpmbuild/{BUILD,RPMS,S{OURCE,PEC,RPM}S} || fatal "package/rpm/make-package"
 cp ${package}-${version}.tar.gz "$destdir"/_TMP/root/rpmbuild/SOURCES/
 rpmbuild --quiet --buildroot "$destdir/_TMP/build" --define "_topdir $destdir/_TMP/root/rpmbuild" -ba "$destdir"/_TMP/package.spec
 test $? -eq 0 || fatal "package/rpm/make-package"
