@@ -73,7 +73,7 @@ dist-hook::
 	rm -rf "$(distdir)/fw"
 	mkdir "$(distdir)/fw"
 	if test -h fw/share; then rm -f fw/share; else true; fi
-	find -L fw -mindepth 1 -print | cpio -pd "$(distdir)" >/dev/null 2>/dev/null
+	find -L fw -mindepth 1 -print | cpio -L -pd "$(distdir)" >/dev/null 2>/dev/null
 	test -d "$(distdir)/fw/bin" || mkdir "$(distdir)/fw/bin"
 	cp `env PATH="$(top_srcdir)/bin:$$PATH" which fw-bootstrap` "$(distdir)/fw/bin"
 	cp `env PATH="$(top_srcdir)/bin:$$PATH" which fw-exec` "$(distdir)/fw/bin"
