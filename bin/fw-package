@@ -145,13 +145,21 @@ FW_PACKAGE_TYPE="$package"
 export FW_PACKAGE_TYPE
 
 fw_exec "template/$template/load-config" >/dev/null || fatal "fw-package"
+eval `fw-exec "template/$template/load-config" | grep FW_POST_RELEASE_COMMANDS`
 
-check_up_to_date 
+for x in FW_POST_RELEASE_COMMANDS
+  do
+    eval test -n \"\$$x\" || {
+      FW_POST_RELEASE_COMMANDS="true"
+    }
+  done
+
+check_up_to_date
 
 if test "x$source_install_only" = x
   then
     get_tag_name tag
-    
+
     check_for_tag "$tag" "$@" 
   fi
 
@@ -159,7 +167,7 @@ if test "x$destdir" = x
   then
     test ! -d fw-pkgtmp || rm -rf fw-pkgtmp || fatal "fw-package"
     fw_exec "revision/$revision/ignore-files" fw-pkgtmp || fatal "fw-package"
-        
+
     destdir="`pwd`/fw-pkgtmp/destdir"
     mkdir -p "$destdir" || fatal "fw-package"
   fi
@@ -175,21 +183,21 @@ if test "x$source_install_only" = x
     check_package_is_ok "$@" --destdir "$destdir"
 
     make_package "$@" --destdir "$destdir" --outdir "$outdir"
-    
+
     test ! -d fw-pkgtmp || rm -rf fw-pkgtmp || fatal "fw-package"
-    
+
     mkdir -p "$destdir" || fatal "fw-package"
-    
+
     make_build_package "$@" --destdir "$destdir" --outdir "$outdir"
-    
+
     test ! -d fw-pkgtmp || rm -rf fw-pkgtmp || fatal "fw-package"
-    
+
     if test -z "$FW_SKIP_TAG" ; then
       make_tag "$@" --tag "$tag"
     else
       echo "fw-package: skip making tag since FW_SKIP_TAG is set" 1>&2
     fi
-    
+
     if test -z "$FW_SKIP_RELEASE" ; then
       release_package "$@" --outdir "$outdir"
     else

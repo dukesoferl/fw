@@ -54,4 +54,4 @@ FW_RPM_POSTCREATEREPO_COMMANDS=${FW_RPM_POSTCREATEREPO_COMMANDS-"{ cd /var; rsyn
 # FW_RPM_POSTCREATEREPO_COMMANDS="gpg --detach-sign --armor repodata/repomd.xml"
 
 # these commands will be run after certain actions
-FW_POST_RELEASE_COMMANDS="git push ; git push --tags"
+FW_POST_RELEASE_COMMANDS=${FW_POST_RELEASE_COMMANDS-"git push ; git push --tags"}
