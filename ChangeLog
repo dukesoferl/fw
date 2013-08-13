@@ -1,3 +1,6 @@
+Version 0.5.4
+  * add a post release hook for running commands
+
 Version 0.5.3
   * Another change for centos6, for some reason cpio behavior seems to have
   changed so that links were not being copied, this led to errors in templates

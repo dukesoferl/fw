@@ -2,7 +2,7 @@
 # environment variable FW_PACKAGE_DEFAULT_MAINTAINER if non-empty
 
 FW_PACKAGE_NAME="framewerk"
-FW_PACKAGE_VERSION="0.5.3"
+FW_PACKAGE_VERSION="0.5.4"
 FW_PACKAGE_MAINTAINER="Paul Mineiro <paul-fw@mineiro.com>"
 FW_PACKAGE_SHORT_DESCRIPTION="A extensible development environment."
 FW_PACKAGE_DESCRIPTION=`cat README`
@@ -52,3 +52,6 @@ FW_RPM_CREATEREPO_INCREMENTAL=${FW_RPM_CREATEREPO_INCREMENTAL-"auto"}
 FW_RPM_POSTCREATEREPO_COMMANDS=${FW_RPM_POSTCREATEREPO_COMMANDS-"{ cd /var; rsync -a yum /var/package/dukes; }"}
 # here's a suggestion:
 # FW_RPM_POSTCREATEREPO_COMMANDS="gpg --detach-sign --armor repodata/repomd.xml"
+
+# these commands will be run after certain actions
+FW_POST_RELEASE_COMMANDS="git push ; git push --tags"

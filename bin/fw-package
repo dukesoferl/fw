@@ -123,6 +123,7 @@ release_package () \
       echo "fw-package: error: release-package failed" 1>&2
       fatal "fw-package"
     }
+    ${FW_POST_RELEASE_COMMANDS}
   }
 
 #---------------------------------------------------------------------

@@ -130,6 +130,11 @@ FW_RPM_CREATEREPO_INCREMENTAL=\${FW_RPM_CREATEREPO_INCREMENTAL-"auto"}
 FW_RPM_POSTCREATEREPO_COMMANDS=\${FW_RPM_POSTCREATEREPO_COMMANDS-"${FW_RPM_POSTCREATEREPO_COMMANDS_DEFAULT:="true"}"}
 # here's a suggestion:
 # FW_RPM_POSTCREATEREPO_COMMANDS="gpg --detach-sign --armor repodata/repomd.xml" 
+# these commands will be run after certain actions
+FW_POST_RELEASE_COMMANDS=\${FW_POST_RELEASE_COMMANDS-"${FW_POST_RELEASE_COMMANDS_DEFAULT:="true"}"}
+# for instance if using a remote git repo this might be
+# FW_POST_RELEASE_COMMANDS="git push ; git push --tags"
+
 EOD
 
       for x in post-install                           \
