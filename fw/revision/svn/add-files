@@ -4,6 +4,7 @@ test -z "${FW_TRACE}" || set -x
 
 which svn >/dev/null 2>/dev/null || exit 1
 
+# old svn
 files=`
   svn info "$@" 2>&1 |                                                  \
   perl -ne 'chomp; m/^(.*?):  \(Not a versioned resource\)/ && do
@@ -12,5 +13,15 @@ files=`
                 $x =~ s/(\s)/\134$1/g;
                 -e "$x" and print "$x ";
               }'`
+# new svn
+test -z "$files" && \
+  files=`svn info "$@" 2>&1 | \
+         grep 'was not found' | \
+         perl -ne 'chomp; m#\/([^\047\/]+)\047# && do
+                     {
+                       my $x = $1;
+                       $x =~ s/(\s)/\134$1/g;
+                       -e "$x" and print "$x ";
+                     }'`
 
 test -z "$files" || svn -q add $files
