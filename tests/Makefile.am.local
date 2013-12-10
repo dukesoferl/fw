@@ -3,6 +3,7 @@
 check_SCRIPTS = 			\
   test-canonicalize-package		\
   test-canonicalize-version		\
+  test-version-comparison		\
   test-template-fw-build		\
   test-template-fw-template		\
   test-template-script			\

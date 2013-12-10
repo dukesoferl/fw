@@ -252,43 +252,68 @@ sub reverse_provides ($$)
   }
 
 #---------------------------------------------------------------------
-#                              rpmvercmp                              
-# 
-# Hopefully just like librpm.
-# http://glu.ttono.us/articles/2007/09/21/rpm-version-comparison-revisited
-#---------------------------------------------------------------------
+#                              rpmvercmp
+#
+# Compare two version strings as RPM does, returning 1 if the first is
+# new than the second, 0 if they are the same, and -1 if the second is
+# newer than the first.
+# ---------------------------------------------------------------------
 
 sub rpmvercmp ($$)
 {
   my ($a, $b) = @_;
 
-  return 0 if $a eq $b;
+  # This function attempts to follow the C code as closely as possible.
+  # http://www.rpm.org/api/4.4.2.2/rpmvercmp_8c-source.html
 
-  my @aver = split /[^[:alnum]]/, $a;
-  my @bver = split /[^[:alnum]]/, $b;
+  if ($a eq $b) { return 0; }
 
-  return 1 if @aver > @bver;
-  return -1 if @aver < @bver;
-
-  my $cmp = 0;
-
-  foreach my $av (@aver)
+  my $one = $a;
+  my $two = $b;
+  while (length($one) > 0 && length($two) > 0)
     {
-      my $bv = shift @bver;
+      $one =~ s/^[^[:alnum:]]+//;
+      $two =~ s/^[^[:alnum:]]+//;
 
-      if ($av =~ /\D/ || $bv =~ /\D/)
-        {
-          $cmp = ($av cmp $bv);
-        }
+      if (length($one) == 0 || length($two) == 0) { last; }
+
+      my $isnum;
+      my $str1 = $one;
+      my $str2 = $two;
+      if ($str1 =~ m/^[[:digit:]]/)
+	{
+	  $str1 =~ m/^([[:digit:]]*)(.*)/ and do { $one = $1; $str1 = $2; };
+	  $str2 =~ m/^([[:digit:]]*)(.*)/ and do { $two = $1; $str2 = $2; };
+	  $isnum = 1;
+	}
       else
-        {
-          $cmp = ($av <=> $bv);
-        }
+	{
+	  $str1 =~ m/^([[:alpha:]]*)(.*)/ and do { $one = $1; $str1 = $2; };
+	  $str2 =~ m/^([[:alpha:]]*)(.*)/ and do { $two = $1; $str2 = $2; };
+	  $isnum = 0;
+	}
 
-      return $cmp if $cmp;
+      if (length($one) == 0) { return -1; } # Shouldn't happen.
+      if (length($two) == 0) { return $isnum ? 1 : -1; }
+
+      if ($isnum) {
+	$one =~ s/^0+//;
+	$two =~ s/^0+//;
+
+	if (length($one) > length($two)) { return 1; }
+	if (length($two) > length($one)) { return -1; }
+      }
+
+      my $rc = $one cmp $two;
+      if ($rc != 0) { return $rc; }
+
+      $one = $str1;
+      $two = $str2;
     }
 
-  return 0;
+  if (length($one) == 0 && length($two) == 0) { return 0; }
+
+  if (length($one) == 0) { return -1; } else { return 1; }
 }
 
 #---------------------------------------------------------------------
