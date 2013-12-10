@@ -1,5 +1,12 @@
 #! /bin/sh
 
+# Skip test if cvs command is not found.
+if test -z "`which cvs 2>/dev/null`"
+  then
+    echo "error: can't find cvs, tests will not work!" 1>&2
+    exit 77
+  fi
+
 (
 set -x
 rm -rf tmp
