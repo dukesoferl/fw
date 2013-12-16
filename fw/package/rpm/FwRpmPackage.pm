@@ -160,9 +160,11 @@ sub get_dependencies ($$$$@)
               # TODO: rpm -qR lists all sorts of wierd stuff ...
               next unless $state->{$package};
 
+              my $alldeps = parse_depends ($state, $arch, $_, $release);
+              my @pkgs = @{$alldeps->{"packages"}};
               scalar map { $deps_by_package{$package}->{$_} = 1;
                            $dependencies{$_} = 1 }
-                     parse_depends ($state, $arch, $_, $release);
+                         @pkgs;
             }
         },
       sub
@@ -373,6 +375,7 @@ sub parse_depends ($$$$)
   {
     my ($state, $arch, $depends, $release) = @_;
 
+    my @missing;
     my %packages;
 
 # libc6 (>= 2.2.1), exim | mail-transport-agent
@@ -383,13 +386,14 @@ sub parse_depends ($$$$)
 
   SPEC:  foreach my $spec (split /,\s*/, $depends)
       {
+        my $p = undef;
   OPTION: foreach my $option (split /\|\s*/, $spec)
           {
             $option =~ 
               m/^(\S+)\s*(\((<<|<=|>=|>>|<(?!=)|=|>(?!=))\s*([^\s\)]*)\))?/ or
               die "can't parse dependencies '$depends' (option '$option')";
 
-            my $p = $1;
+            $p = $1;
             my $op = $3;
             my $rawv = defined ($4) ? $4 : "";
             my $version = ($rawv eq "INSTALLED") ? $state->{$p} : $rawv;
@@ -398,7 +402,6 @@ sub parse_depends ($$$$)
               {
                 my $not = $1;
                 my $restrict = $2;
-
                 next SPEC if ($not && $restrict eq $arch);
                 next SPEC if (! $not && $restrict ne $arch);
               }
@@ -427,13 +430,20 @@ sub parse_depends ($$$$)
               }
           }
 
+        # keep track of mising packages
+        push @missing, $p;
+
         die "package/rpm/dependency-closure: fatal: '$spec' not installed\n" 
           if $release eq "yes";
 
         warn "package/rpm/dependency-closure: warning: '$spec' not installed\n" 
       }
 
-    return (wantarray) ? keys %packages : \%packages;
+    my @pk = keys %packages;
+    return { "packages" => \@pk,
+             "missing" => \@missing,
+             "manifest" => \%packages
+           };
   }
 
 END { }       # module clean-up code here (global destructor)

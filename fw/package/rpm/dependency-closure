@@ -21,7 +21,8 @@ my $release = $ARGV[2] or die $usage;
 
 my ($state, $virtual) = get_state ();
 
-my @packages = parse_depends ($state, $arch, $depends, $release);
+my $alldeps = parse_depends ($state, $arch, $depends, $release);
+my @packages = @{$alldeps->{"packages"}};
 
 my @closure = 
   get_dependencies_closure ($state, $virtual, $arch, $release, @packages);

@@ -13,7 +13,7 @@ use strict;
 #                                main                                 
 #---------------------------------------------------------------------
 
-my $usage = "package/rpm/check-for-packages: fatal: usage: $0 --arch arch --depends depends --release release\n";
+my $usage = "package/rpm/check-for-packages: fatal: usage: $0 --arch arch --depends depends --release release --getdeps getdeps\n";
 
 $ARGV[0] eq "--arch" or die $usage;
 my $arch = $ARGV[1] or die $usage;
@@ -21,8 +21,37 @@ $ARGV[2] eq "--depends" or die $usage;
 my $depends = $ARGV[3] or exit 0;       # no dependencies -> automatic win
 $ARGV[4] eq "--release" or die $usage;
 my $release = $ARGV[5] or die $usage;
+$ARGV[6] eq "--getdeps" or die $usage;
+my $getdeps= $ARGV[7] or die $usage;
 
-my ($state, undef) = get_state ();
+my @packages;
+# if getdeps is specified, attempt to use yum to install all the missing
+# dependencies.
+if ($getdeps eq "yes") {
+  my $maxtries = 10;
+  my $num_missing = 1000000;
+  my @missing = ();
+  while ($num_missing > 0 and $maxtries > 0) {
+    my ($state, undef) = get_state ();
+    # we ignore release in the case we are fetching dependencies, otherwise
+    # things stop
+    my $alldeps = parse_depends ($state, $arch, $depends, "no");
+    @packages = @{$alldeps->{"packages"}};
+    @missing = @{$alldeps->{"missing"}};
+    $num_missing = scalar @missing;
+    if (scalar @missing > 0) {
+      my $cmd = "sudo yum install -y @missing";
+      warn "INSTALLING DEPS @missing\n";
+      my $results = `$cmd`;
+      warn "$results\n";
+    }
+    $maxtries -= 1;
+  }
+} else {
+  my ($state, undef) = get_state ();
+  my $alldeps = parse_depends ($state, $arch, $depends, $release);
+  @packages = @{$alldeps->{"packages"}};
+}
 
-print join "\n", parse_depends ($state, $arch, $depends, $release);
+print join "\n", @packages;
 print "\n";

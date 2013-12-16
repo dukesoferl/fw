@@ -29,15 +29,22 @@ fw_source "package/rpm/check-build-environment" "sh/validate-args.sh"
 
 parse_args "package/rpm/check-build-environment" "$@"
 
-validate_args "package/rpm/check-build-environment" "template" "template"
+validate_args "package/rpm/check-build-environment" "template getdeps" "template"
 
 which rpm >/dev/null 2>/dev/null || {
   echo "package/rpm/check-build-environment: error: rpm not installed" 1>&2
   fatal "package/rpm/check-build-environment"
 }
 
+if test "x$getdeps" = xyes
+  then
+    getdeps="yes"
+  else
+    getdeps="no"
+  fi
+
 eval `fw_exec "template/$template/load-config"`
 
 arch=`rpm -q rpm --queryformat %{arch}`
 
-fw_exec "package/rpm/check-for-packages" --arch "$arch" --depends "$FW_PACKAGE_BUILD_DEPENDS" --release yes >/dev/null
+fw_exec "package/rpm/check-for-packages" --arch "$arch" --depends "$FW_PACKAGE_BUILD_DEPENDS" --release yes --getdeps $getdeps >/dev/null
