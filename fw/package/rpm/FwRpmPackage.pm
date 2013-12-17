@@ -15,7 +15,7 @@ BEGIN {
    @ISA         = qw (Exporter);
    @EXPORT      = qw (&proctalk &get_state &get_dependencies &closure
                       &get_dependencies_closure 
-                      &reverse_provides &parse_depends &rpmvercmp);
+                      &reverse_provides &parse_depends &rpmvercmp &rpmevrcmp);
    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
    # your exported package globals go here,
@@ -266,6 +266,12 @@ sub rpmvercmp ($$)
   # This function attempts to follow the C code as closely as possible.
   # http://www.rpm.org/api/4.4.2.2/rpmvercmp_8c-source.html
 
+  if (! defined($a) || ! defined($b)) {
+    if (defined($a)) { return 1; }  # $a is defined and $b isn't.
+    if (defined($b)) { return -1; } # $b is defined and $a isn't.
+    return 0;			    # Neither $a nor $b is defined.
+  }
+
   if ($a eq $b) { return 0; }
 
   my $one = $a;
@@ -317,6 +323,30 @@ sub rpmvercmp ($$)
 }
 
 #---------------------------------------------------------------------
+#                              rpmevrcmp
+#
+# Compare two epoch:version-revision strings as RPM does, returning 1
+# if the first is newer than the second, 0 if they are the same, and -1
+# if the second is newer than the first.
+# ---------------------------------------------------------------------
+
+sub rpmevrcmp
+  {
+    my ($a, $b) = @_;
+
+    my ($ae, $av, $ar) = ($a =~ m{^(?:([^:]*):)?([^-]*)(?:-(.*))?$});
+    my ($be, $bv, $br) = ($b =~ m{^(?:([^:]*):)?([^-]*)(?:-(.*))?$});
+
+    my $cmp = rpmvercmp($ae, $be);
+    if ($cmp != 0) { return $cmp; }
+
+    $cmp = rpmvercmp($av, $bv);
+    if ($cmp != 0) { return $cmp; }
+
+    return rpmvercmp($ar, $br);
+}
+
+#---------------------------------------------------------------------
 #                             enforce_op                              
 # 
 # Check whether $installed $op $version is true.
@@ -332,7 +362,7 @@ sub enforce_op ($$$)
       }
     else
       {
-        my $cmp = rpmvercmp ($installed, $version);
+        my $cmp = rpmevrcmp ($installed, $version);
 
         if ($operation eq "<<" || $operation eq "<")
           {
