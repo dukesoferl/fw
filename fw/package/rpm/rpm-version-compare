@@ -17,4 +17,4 @@ my $ver1 = $ARGV[0];
 defined ($ARGV[1]) or die $usage;
 my $ver2 = $ARGV[1];
 
-print rpmvercmp ($ver1, $ver2)."\n";
+print rpmevrcmp ($ver1, $ver2)."\n";
