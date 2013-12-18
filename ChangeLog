@@ -1,3 +1,6 @@
+  * Added an environment variable which will set the Release field in an RPM
+  spec file, FW_PACKAGE_RELEASE_VERSION, allowing CI systems like bamboo to
+  set it with their build # when building a package
   * added an option to the generated configure '--enable-getdeps' which will
   pull dependencies using sudo yum install
   * fix for rpmvercmp by David Hull

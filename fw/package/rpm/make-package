@@ -303,7 +303,12 @@ if test "$FW_PACKAGE_ARCHITECTURE_DEPENDENT" = "1"
 
 if test "x$release" = xyes
   then
-    releasenum="1"
+    if test "x${FW_PACKAGE_RELEASE_VERSION}" = "x"
+      then
+        releasenum="1"
+      else
+        releasenum="${FW_PACKAGE_RELEASE_VERSION}"
+      fi
   else
     releasenum="TEST1"
   fi
