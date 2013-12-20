@@ -376,7 +376,9 @@ sub parse_depends ($$$$)
     my ($state, $arch, $depends, $release) = @_;
 
     my @missing;
+    my @missing_specs;
     my %packages;
+    my $first = 1;
 
 # libc6 (>= 2.2.1), exim | mail-transport-agent
 # kernel-headers-2.2.10 [!hurd-i386], hurd-dev [hurd-i386]
@@ -387,6 +389,7 @@ sub parse_depends ($$$$)
   SPEC:  foreach my $spec (split /,\s*/, $depends)
       {
         my $p = undef;
+        my $possible_missing = "";
   OPTION: foreach my $option (split /\|\s*/, $spec)
           {
             $option =~ 
@@ -402,8 +405,12 @@ sub parse_depends ($$$$)
               {
                 my $not = $1;
                 my $restrict = $2;
-                next SPEC if ($not && $restrict eq $arch);
-                next SPEC if (! $not && $restrict ne $arch);
+                if ($not && $restrict eq $arch) {
+                  next SPEC;
+                }
+                if (! $not && $restrict ne $arch) {
+                  next SPEC;
+                }
               }
 
             if ($state->{$p})
@@ -428,20 +435,56 @@ sub parse_depends ($$$$)
                     next SPEC;
                   }
               }
+
+            # I want to make sure that if this is an "=" dependency that
+            # the exact version is installed, so I check here and keep
+            # track of all specified = versions (so things like
+            # pkg (= 1.0) | pkg (= 2.0) still sort of work).
+            if (defined $op and $op eq "=")
+              {
+                my $yum_version_with_epoch = undef;
+
+                # special processing needed for packages with epochs
+                if ($version =~ m#^([^:]+):(.*)$#)
+                  {
+                    $yum_version_with_epoch = $1.":".$p."-".$2.".".$arch;
+                  }
+                else
+                  {
+                    $yum_version_with_epoch = "$p-$version";
+                  }
+
+                # just concatenate all the versions and hope that yum will
+                # sort it out :)
+                $possible_missing .= $yum_version_with_epoch." ";
+              }
           }
 
         # keep track of mising packages
-        push @missing, $p;
+        if ($possible_missing ne "")
+          {
+            push @missing, $possible_missing;
+          }
+        else
+          {
+            push @missing, $p;
+          }
+        push @missing_specs, $spec;
 
         die "package/rpm/dependency-closure: fatal: '$spec' not installed\n" 
           if $release eq "yes";
 
+        if ($first) {
+          warn "\n";
+          $first = 0;
+        }
         warn "package/rpm/dependency-closure: warning: '$spec' not installed\n" 
       }
 
     my @pk = keys %packages;
     return { "packages" => \@pk,
              "missing" => \@missing,
+             "missing_specs" => \@missing_specs,
              "manifest" => \%packages
            };
   }

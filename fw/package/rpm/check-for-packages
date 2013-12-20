@@ -28,9 +28,10 @@ my @packages;
 # if getdeps is specified, attempt to use yum to install all the missing
 # dependencies.
 if ($getdeps eq "yes") {
-  my $maxtries = 10;
+  my $maxtries = 2;
   my $num_missing = 1000000;
   my @missing = ();
+  my @missing_specs = ();
   while ($num_missing > 0 and $maxtries > 0) {
     my ($state, undef) = get_state ();
     # we ignore release in the case we are fetching dependencies, otherwise
@@ -38,14 +39,21 @@ if ($getdeps eq "yes") {
     my $alldeps = parse_depends ($state, $arch, $depends, "no");
     @packages = @{$alldeps->{"packages"}};
     @missing = @{$alldeps->{"missing"}};
+    @missing_specs = @{$alldeps->{"missing_specs"}};
     $num_missing = scalar @missing;
     if (scalar @missing > 0) {
       my $cmd = "sudo yum install -y @missing";
-      warn "INSTALLING DEPS @missing\n";
+      warn "ATTEMPTING TO INSTALL DEPS\n\t".join ("\n\t",@missing)."\n";
+      warn "$cmd\n";
       my $results = `$cmd`;
+      my $return_code = $? >> 8;
       warn "$results\n";
     }
     $maxtries -= 1;
+  }
+  if ($maxtries <= 0) {
+    die "UNABLE to install build deps still missing\n\t"
+        .join ("\n\t",@missing_specs)."\n";
   }
 } else {
   my ($state, undef) = get_state ();
