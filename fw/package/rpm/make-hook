@@ -23,70 +23,102 @@ fw_source "package/rpm/make-hook" "sh/fw-exec.sh"
 fw_source "package/rpm/make-hook" "sh/parse-args.sh"
 fw_source "package/rpm/make-hook" "sh/validate-args.sh"
 
-comparescript="
+comparescript='
 rpm_compare () { 
-  perl -e '
-    sub rpmvercmp (\$\$)
-      {
-        my (\$a, \$b) = @_;
+  perl - "$@" <<'\'EOF_PERL\''
+sub rpmvercmp ($$)
+{
+  my ($a, $b) = @_;
 
-        return 0 if \$a eq \$b;
+  # This function attempts to follow the C code as closely as possible.
+  # http://www.rpm.org/api/4.4.2.2/rpmvercmp_8c-source.html
 
-        my @aver = split /[^[:alnum]]/, \$a;
-        my @bver = split /[^[:alnum]]/, \$b;
+  if (! defined($a) || ! defined($b)) {
+    if (defined($a)) { return 1; }  # $a is defined and $b is not.
+    if (defined($b)) { return -1; } # $b is defined and $a is not.
+    return 0;			    # Neither $a nor $b is defined.
+  }
 
-        return 1 if @aver > @bver;
-        return -1 if @aver < @bver;
+  if ($a eq $b) { return 0; }
 
-        my \$cmp = 0;
+  my $one = $a;
+  my $two = $b;
+  while (length($one) > 0 && length($two) > 0)
+    {
+      $one =~ s/^[^[:alnum:]]+//;
+      $two =~ s/^[^[:alnum:]]+//;
 
-        foreach my \$av (@aver)
-          {
-            my \$bv = shift @bver;
+      if (length($one) == 0 || length($two) == 0) { last; }
 
-            if (\$av =~ /[^\d]/ || \$bv =~ /[^\d]/)
-              {
-                \$cmp = (\$av cmp \$bv);
-              }
-            else
-              {
-                \$cmp = (\$av <=> \$bv);
-              }
+      my $isnum;
+      my $str1 = $one;
+      my $str2 = $two;
+      if ($str1 =~ m/^[[:digit:]]/)
+	{
+	  $str1 =~ m/^([[:digit:]]*)(.*)/ and do { $one = $1; $str1 = $2; };
+	  $str2 =~ m/^([[:digit:]]*)(.*)/ and do { $two = $1; $str2 = $2; };
+	  $isnum = 1;
+	}
+      else
+	{
+	  $str1 =~ m/^([[:alpha:]]*)(.*)/ and do { $one = $1; $str1 = $2; };
+	  $str2 =~ m/^([[:alpha:]]*)(.*)/ and do { $two = $1; $str2 = $2; };
+	  $isnum = 0;
+	}
 
-            return \$cmp if \$cmp;
-          }
+      if (length($one) == 0) { return -1; } # Should not happen.
+      if (length($two) == 0) { return $isnum ? 1 : -1; }
 
-        return 0;
-      };
+      if ($isnum) {
+	$one =~ s/^0+//;
+	$two =~ s/^0+//;
 
-    if (\$ARGV[1] eq \"lt\")
-      {
-        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) < 0) ? 0 : 1);
-      }
-    elsif (\$ARGV[1] eq \"le\")
-      {
-        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) <= 0) ? 0 : 1);
-      }
-    elsif (\$ARGV[1] eq \"eq\")
-      {
-        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) == 0) ? 0 : 1);
-      }
-    elsif (\$ARGV[1] eq \"ne\")
-      {
-        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) != 0) ? 0 : 1);
-      }
-    elsif (\$ARGV[1] eq \"ge\")
-      {
-        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) >= 0) ? 0 : 1);
-      }
-    elsif (\$ARGV[1] eq \"gt\")
-      {
-        exit ((rpmvercmp (\$ARGV[0], \$ARGV[2]) > 0) ? 0 : 1);
+	if (length($one) > length($two)) { return 1; }
+	if (length($two) > length($one)) { return -1; }
       }
 
-    die \"bad arguments\";' \"\$@\" 
+      my $rc = $one cmp $two;
+      if ($rc != 0) { return $rc; }
+
+      $one = $str1;
+      $two = $str2;
+    }
+
+  if (length($one) == 0 && length($two) == 0) { return 0; }
+
+  if (length($one) == 0) { return -1; } else { return 1; }
 }
-"
+
+sub rpmevrcmp
+  {
+    my ($a, $b) = @_;
+
+    my ($ae, $av, $ar) = ($a =~ m{^(?:([^:]*):)?([^-]*)(?:-(.*))?$});
+    my ($be, $bv, $br) = ($b =~ m{^(?:([^:]*):)?([^-]*)(?:-(.*))?$});
+
+    my $cmp = rpmvercmp($ae, $be);
+    if ($cmp != 0) { return $cmp; }
+
+    $cmp = rpmvercmp($av, $bv);
+    if ($cmp != 0) { return $cmp; }
+
+    return rpmvercmp($ar, $br);
+}
+
+my %cmp = (
+  lt => sub { return rpmevrcmp($_[0], $_[1]) <  0; },
+  le => sub { return rpmevrcmp($_[0], $_[1]) <= 0; },
+  eq => sub { return rpmevrcmp($_[0], $_[1]) == 0; },
+  ne => sub { return rpmevrcmp($_[0], $_[1]) != 0; },
+  ge => sub { return rpmevrcmp($_[0], $_[1]) >= 0; },
+  gt => sub { return rpmevrcmp($_[0], $_[1]) >  0; },
+);
+
+defined(my $cmpfunc = $cmp{$ARGV[1]}) or die "bad arguments";
+exit($cmpfunc->($ARGV[0], $ARGV[2]) ? 0 : 1);
+EOF_PERL
+}
+'
 
 make_post_install () {
   cat <<EOD
