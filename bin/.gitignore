@@ -3,3 +3,4 @@ Makefile.in
 Makefile.am
 .*.script_ok
 fw-init
+fw-reset-to-base

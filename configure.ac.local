@@ -39,6 +39,9 @@ AC_CONFIG_FILES([fw/Makefile
 AC_CONFIG_FILES([bin/fw-init],
                 [chmod +x bin/fw-init])
 
+AC_CONFIG_FILES([bin/fw-reset-to-base],
+                [chmod +x bin/fw-reset-to-base])
+
 AC_CONFIG_FILES([tests/test-cvs],
                 [chmod +x tests/test-cvs])
 

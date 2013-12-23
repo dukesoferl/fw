@@ -1,3 +1,8 @@
+Version 0.7.0
+  * Added a script called fw-reset-to-base which will attempt to reset an
+  RPM based system to the file containing a list of rpms given to it via the
+  command line.
+
 Version 0.6.0
   * Added an environment variable which will set the Release field in an RPM
   spec file, FW_PACKAGE_RELEASE_VERSION, allowing CI systems like bamboo to

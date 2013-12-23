@@ -6,6 +6,7 @@ dist_bin_SCRIPTS =			\
   fw-package
 
 bin_SCRIPTS = 				\
-  fw-init
+  fw-init \
+  fw-reset-to-base
 
-CLEANFILES += fw-init
+CLEANFILES += fw-init fw-reset-to-base

@@ -1,0 +1,168 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Getopt::Long;
+use Pod::Usage;
+
+my $dryrun = 0;
+my $verbose = 0;
+my $help = 0;
+my $man = 0;
+my $package_type = "@FW_NATIVE_PACKAGE_TYPE@";
+
+GetOptions ("dryrun" => \$dryrun,
+            "verbose" => \$verbose,
+            "help"    => \$help,
+            "man"     => \$man
+          ) or pod2usage(2);
+
+my $base = shift;
+
+pod2usage (-msg => "Only works for RPM systems at the moment.",
+           -exitval => 2) if $package_type ne "rpm";
+
+pod2usage (-exitval => -1, -verbose => 1) if $help;
+pod2usage (-exitval => -2, -verbose => 2) if $man;
+
+pod2usage (-msg => "Must provide a file of packages",
+           -exitval => 1,
+           -verbose => 1) if ! defined $base;
+
+my $tmp_base_file = "/tmp/fw.pkgs.base";
+my $tmp_installed_file = "/tmp/fw.pkgs.installed";
+
+`rpm -qa | sort > $tmp_installed_file`;
+`cat $base | sort > $tmp_base_file`;
+
+my @differences = `diff $tmp_base_file $tmp_installed_file`;
+my $ret = $?;
+my @to_remove = ();
+my @to_add = ();
+my @changes_to_remove = ();
+my @changes_to_add = ();
+
+if ($ret != 0 ) {
+  print "DETECTED differences from base\n" if $verbose;
+  my $diff_action;
+  foreach my $line (@differences) {
+    # check for a line which matches the standard diff output
+    # and keep track of the action (ie, 'a' for added, 'd' for deleted,
+    # and 'c' for changed
+    if ($line =~ m/^\d+(,\d+)?([acd])\d+(,\d+)?$/)
+      {
+        $diff_action = $2;
+      }
+    else
+      {
+        if ($line =~ m#^>\s(.*)#)
+          {
+            if ($diff_action eq "a") {
+              # lines starting with '> ' should be adds or changes
+              push @to_remove, $1;
+            } elsif ($diff_action eq "c") {
+              push @changes_to_remove, $1;
+            }
+          }
+        elsif ($line =~ m#^<\s(.*)# )
+          {
+            # lines starting with '< ' should be turned into
+            # deletes, for change actions this could lead
+            # to data missing momentarily
+            if ($diff_action eq "d") {
+              # lines starting with '< ' should be deletes or changes
+              push @to_add, $1;
+            } elsif ($diff_action eq "c") {
+              push @changes_to_add, $1;
+            }
+          }
+        else
+          {
+            # ignore extra lines
+          }
+      }
+  }
+}
+
+if ($ret) {
+  print "# would run\n" if $dryrun;
+  my $ret1 = run_or_true ("sudo yum install -y ",@to_add);
+  my $ret2 = run_or_true ("sudo rpm -e ",@to_remove);
+  my $ret3 = run_or_true ("sudo rpm -e --nodeps ",@changes_to_remove);
+  my $ret4 = run_or_true ("sudo yum install -y ",@changes_to_add);
+
+  $ret = ($ret1 and $ret2 and $ret3 and $ret4);
+} else {
+  print "# nothing to do\n" if $dryrun;
+  print "Nothing to do\n" if $verbose;
+}
+
+sub run {
+  my $cmd = shift;
+  my $ret = 0;
+  if ($dryrun) {
+    print "$cmd\n"
+  } else {
+    print "running $cmd\n" if $verbose;
+    my $res = `$cmd`;
+    $ret = $?;
+    print "returned [$ret]\n" if $verbose;
+    print $res if $verbose;
+  }
+  return not $ret;  # unix commands assume 0 is true, so negate
+}
+
+sub run_or_true {
+  my ($cmd, @list) = @_;
+  return ((scalar @list > 0)
+          and run $cmd." \\\n\t".join (" \\\n\t",@list));
+}
+
+
+exit $ret;
+
+__END__
+
+=head1 NAME
+
+fw-reset-to-base - when given a list of packages which make up the base system this command will revert all packages to those listed
+
+=head1 SYNOPSIS
+
+fw-reset-to-base [options] <file-of-packages>
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<--dryrun>
+
+Show the commands that would be run, but don't run them.
+
+=item B<--verbose>
+
+Print extra information while running
+
+=item B<--help>
+
+Short help
+
+=item B<--man>
+
+Longer help
+
+=back
+
+=head1 DESCRIPTION
+
+When given a list of packages in a file (usually as a result of running
+'rpm -qa > base.pkgs'), this program will attempt to reset the state of
+the system packages to those listed in the file.  This could be better
+accomplished with other tools, but this offers an alternative for simple
+cases.
+
+=head1 AUTHOR
+
+Anthony Molinaro <anthonym@alummni.caltech.edu>
+
+=cut
