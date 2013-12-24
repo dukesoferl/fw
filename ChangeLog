@@ -1,3 +1,6 @@
+Version 0.7.1
+  * maxtries needs to be higher for getdeps
+
 Version 0.7.0
   * Added a script called fw-reset-to-base which will attempt to reset an
   RPM based system to the file containing a list of rpms given to it via the

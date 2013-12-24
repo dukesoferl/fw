@@ -28,7 +28,7 @@ my @packages;
 # if getdeps is specified, attempt to use yum to install all the missing
 # dependencies.
 if ($getdeps eq "yes") {
-  my $maxtries = 2;
+  my $maxtries = 10;
   my $num_missing = 1000000;
   my @missing = ();
   my @missing_specs = ();
