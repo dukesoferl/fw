@@ -52,4 +52,4 @@ cat fw-pkgin/config                                             |       \
                   print;
                 }'                                              |       \
     perl -pe 's/"\s+([\w|"])/"$1/g;'                            |       \
-perl -lpe 'chomp; s%, "%"%; s%#(.*)%%;'
+    perl -lpe 'chomp; s%, "%"%; s%#(.*)%%;'

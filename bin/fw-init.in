@@ -84,6 +84,8 @@ EOD
 FW_PACKAGE_NAME="$name"
 FW_PACKAGE_VERSION="0.0.0"
 FW_PACKAGE_MAINTAINER="${FW_PACKAGE_DEFAULT_MAINTAINER:="`whoami` <`whoami`@`hostname`>"}"
+FW_PACKAGE_ORGANIZATION=\${FW_PACKAGE_ORGANIZATION-"${FW_PACKAGE_DEFAULT_ORGANIZATION:="unknown"}"}
+FW_PACKAGE_PACKAGER=\${FW_PACKAGE_PACKAGER-"${FW_PACKAGE_DEFAULT_PACKAGER:="`whoami` <`whoami`@`hostname`>"}"}
 FW_PACKAGE_SHORT_DESCRIPTION="A short description."
 FW_PACKAGE_DESCRIPTION=\`cat README\`
 FW_PACKAGE_ARCHITECTURE_DEPENDENT="1"
@@ -133,7 +135,7 @@ FW_RPM_POSTCREATEREPO_COMMANDS=\${FW_RPM_POSTCREATEREPO_COMMANDS-"${FW_RPM_POSTC
 # these commands will be run after certain actions
 FW_POST_RELEASE_COMMANDS=\${FW_POST_RELEASE_COMMANDS-"${FW_POST_RELEASE_COMMANDS_DEFAULT:="true"}"}
 # for instance if using a remote git repo this might be
-# FW_POST_RELEASE_COMMANDS="git push ; git push --tags"
+# FW_POST_RELEASE_COMMANDS="(git ls-remote 1&>2 && git push && git push --tags) ; exit 0"
 
 EOD
 
@@ -145,7 +147,7 @@ EOD
                stop
         do
           fw_find "build/automake/fw-pkgin/$x" file
-	  test -z "$file" && exit 1
+          test -z "$file" && exit 1
           cp -f "$file" . || exit 1
           chmod +w "$x" || exit 1
         done

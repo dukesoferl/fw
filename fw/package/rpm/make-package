@@ -127,6 +127,25 @@ make_spec_file () \
         postremove="#! /bin/sh\nexit 0"
       fi
 
+    if test "x$FW_PACKAGE_ORGANIZATION" = x
+      then
+        vendortag="#Vendor:"
+      else
+        vendortag="Vendor: $FW_PACKAGE_ORGANIZATION"
+      fi
+
+    if test "x$FW_PACKAGE_PACKAGER" = x
+      then
+        if test "x$FW_PACKAGE_MAINTAINER" = x
+          then
+            packagertag="Packager: $FW_PACKAGE_MAINTAINER"
+          else
+            packagertag="#Packager:"
+          fi
+      else
+        packagertag="Packager: $FW_PACKAGE_PACKAGER"
+      fi
+
     cat <<EOD > "$destdir"/_TMP/package.spec
 # redhat tends to make -debuginfo packages which framewerk doesn't know
 # how to deal with, so we'll just turn them off
@@ -143,8 +162,8 @@ BuildArch: $arch
 BuildRoot: %{_tmppath}/%{name}-buildroot
 #URL:
 #Distribution:
-#Vendor:
-#Packager:
+$vendortag
+$packagertag
 $dependstag
 $conflictstag
 $providestag

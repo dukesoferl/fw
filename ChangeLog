@@ -1,3 +1,8 @@
+Version 0.8.0
+  * support FW_PACKAGE_ORGANIZATION as a config variable
+  * support FW_PACKAGE_PACKAGER as a config variable
+  * use these in RPM packaging
+
 Version 0.7.1
   * maxtries needs to be higher for getdeps
 
