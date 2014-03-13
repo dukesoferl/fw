@@ -88,7 +88,9 @@ sub check_for_packages ($$$)
                 "--depends",
                 "$depends",
                 "--release",
-                "yes")
+                "yes",
+                "--getdeps",
+                "no")
             or die "$0: fatal: exec failed: $!";
         }
     );

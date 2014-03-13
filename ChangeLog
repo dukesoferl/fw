@@ -1,3 +1,6 @@
+Version 0.8.1
+  * getdeps was failing for C packages, make it not fail, but not work either
+
 Version 0.8.0
   * support FW_PACKAGE_ORGANIZATION as a config variable
   * support FW_PACKAGE_PACKAGER as a config variable
