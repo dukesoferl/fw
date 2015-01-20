@@ -397,28 +397,39 @@ sub parse_depends ($$$$)
 # kernel-headers-2.2.10 [!hurd-i386], hurd-dev [hurd-i386]
 # erlang-nox (= INSTALLED)
 
-    my @pkgspecs = split /,\s*/, $depends;
-
-  SPEC:  foreach my $spec (split /,\s*/, $depends)
+  SPEC:  foreach my $spec (split(/\s*,\s*/, $depends))
       {
-  OPTION: foreach my $option (split /\|\s*/, $spec)
+        my $p = undef;
+        my $possible_missing = "";
+  OPTION: foreach my $option (split(/\s*\|\s*/, $spec))
           {
             $option =~ 
-              m/^(\S+)\s*(\((<<|<=|>=|>>|<(?!=)|=|>(?!=))\s*([^\s\)]*)\))?/ or
+              m/^(\S+)	 # package name
+		\s*
+		(?:      # optional version specification: "( OP VERSION )"
+		  \( \s* (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+) \s* \)
+		)?
+		\s*
+		(?:      # optional architecture specification: "[ ARCH ]" or "[ ! ARCH ]"
+		  \[ \s* (!)? \s* ([^\s\!\]]+) \s* \]
+		)?
+		\s*$/x or
               die "can't parse dependencies '$depends' (option '$option')";
 
-            my $p = $1;
-            my $op = $3;
-            my $rawv = defined ($4) ? $4 : "";
+            $p = $1;
+            my $op = $2;
+            my $rawv = defined ($3) ? $3 : "";
             my $version = ($rawv eq "INSTALLED") ? $state->{$p} : $rawv;
+	    my $not = $4;
+	    my $restrict = $5;
 
-            if ($option =~ m/\[(!)?(.*)\]/)
-              {
-                my $not = $1;
-                my $restrict = $2;
-
-                next SPEC if ($not && $restrict eq $arch);
-                next SPEC if (! $not && $restrict ne $arch);
+	    if (defined $not) {
+                if ($not && $restrict eq $arch) {
+                  next SPEC;
+                }
+                if (! $not && $restrict ne $arch) {
+                  next SPEC;
+                }
               }
 
             if ($state->{$p})
