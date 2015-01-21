@@ -420,27 +420,46 @@ sub parse_depends ($$$$)
         my $possible_missing = "";
   OPTION: foreach my $option (split(/\s*\|\s*/, $spec))
           {
-            $option =~ 
-              m/^(\S+)	 # package name
-		\s*
-		(?:      # optional version specification: "( OP VERSION )"
-		  \( \s* (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+) \s* \)
-		)?
-		\s*
-		(?:      # optional architecture specification: "[ ARCH ]" or "[ ! ARCH ]"
-		  \[ \s* (!)? \s* ([^\s\!\]]+) \s* \]
-		)?
-		\s*$/x or
+            my ($op, $version, $not, $restrict);
+          PARSE_OPTION: {
+              $option =~ # DEB FORMAT
+                m/^(\S+)   # package name
+                  \s*
+                  (?:      # optional version specification: "( OP VERSION )"
+                    \( \s* (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+) \s* \)
+                  )?
+                  \s*
+                  (?:      # optional architecture specification: "[ ARCH ]" or "[ ! ARCH ]"
+                    \[ \s* (!)? \s* ([^\s\!\]]+) \s* \]
+                  )?
+                  \s*$/x and do {
+                    $p = $1;
+                    $op = $2;
+                    $version = (not defined $3) ? '' : $3 eq 'INSTALLED' ? $state->{$p} : $3;
+                    $not = $4;
+                    $restrict = $5;
+                    # no warnings 'uninitialized';
+                    # print STDERR "deb $option -> $p $op $version $not $restrict\n";
+                    last PARSE_OPTION;
+                  };
+              $option =~ # RPM FORMAT
+                m/^(\S+)   # package name
+                  \s*
+                  (?:      # optional version specification: "OP VERSION"
+                    (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+)
+                  )?
+                  \s*$/x and do {
+                    $p = $1;
+                    $op = $2;
+                    $version = (not defined $3) ? '' : $3 eq 'INSTALLED' ? $state->{$p} : $3;
+                    # no warnings 'uninitialized';
+                    # print STDERR "rpm $option -> $p $op $version\n";
+                    last PARSE_OPTION;
+                  };
               die "can't parse dependencies '$depends' (option '$option')";
+            }
 
-            $p = $1;
-            my $op = $2;
-            my $rawv = defined ($3) ? $3 : "";
-            my $version = ($rawv eq "INSTALLED") ? $state->{$p} : $rawv;
-	    my $not = $4;
-	    my $restrict = $5;
-
-	    if (defined $not) {
+            if (defined $not) {
                 if ($not && $restrict eq $arch) {
                   next SPEC;
                 }
