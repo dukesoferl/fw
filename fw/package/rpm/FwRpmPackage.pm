@@ -247,7 +247,7 @@ sub reverse_provides ($$)
              ."--queryformat '%-{name} %{version}-%{release}\n' "
              .$package;
     my $provides = `$cmd`;
-    $provides =~ m/^(\S+) / or die "unexpected rpm output: $provides";
+    $provides =~ m/^(\S+) / or die "unexpected rpm output for \"$cmd\": $provides";
     $reverse_provider = $1 if $state->{$1};
 
     return $reverse_provider;
