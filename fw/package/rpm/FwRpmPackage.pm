@@ -327,15 +327,18 @@ sub rpmvercmp ($$)
 #---------------------------------------------------------------------
 #                              rpmevrcmp
 #
-# Compare two epoch:version-revision strings as RPM does, returning 1
-# if the first is newer than the second, 0 if they are the same, and -1
-# if the second is newer than the first.
+# Compare two epoch:version-release strings as RPM does, the first of
+# which is the installed EVR and the second of which is the dependency
+# EVR.  rpmevrcmp returns 1 if the installed EVR is greater than the
+# dependency EVR, 0 if they are the equal, and -1 if the installed EVR
+# is less than the dependency EVR.
 # ---------------------------------------------------------------------
 
 sub rpmevrcmp
   {
     my ($a, $b) = @_;
 
+    # The parts of an RPM version number are EPOCH:VERSION-RELEASE.
     my ($ae, $av, $ar) = ($a =~ m{^(?:([^:]*):)?([^-]*)(?:-(.*))?$});
     my ($be, $bv, $br) = ($b =~ m{^(?:([^:]*):)?([^-]*)(?:-(.*))?$});
 
@@ -344,6 +347,10 @@ sub rpmevrcmp
 
     $cmp = rpmvercmp($av, $bv);
     if ($cmp != 0) { return $cmp; }
+
+    # If the dependency release is not specified, consider any
+    # installed release to be equal.
+    if (! defined ($br)) { return 0; }
 
     return rpmvercmp($ar, $br);
 }
