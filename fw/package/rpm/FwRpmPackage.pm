@@ -247,7 +247,7 @@ sub reverse_provides ($$)
              ."--queryformat '%-{name} %{version}-%{release}\n' "
              .$package;
     my $provides = `$cmd`;
-    $provides =~ m/^(\S+) / or die "unexpected rpm output: $provides";
+    $provides =~ m/^(\S+) / or die "unexpected rpm output for \"$cmd\": $provides";
     $reverse_provider = $1 if $state->{$1};
 
     return $reverse_provider;
@@ -327,15 +327,18 @@ sub rpmvercmp ($$)
 #---------------------------------------------------------------------
 #                              rpmevrcmp
 #
-# Compare two epoch:version-revision strings as RPM does, returning 1
-# if the first is newer than the second, 0 if they are the same, and -1
-# if the second is newer than the first.
+# Compare two epoch:version-release strings as RPM does, the first of
+# which is the installed EVR and the second of which is the dependency
+# EVR.  rpmevrcmp returns 1 if the installed EVR is greater than the
+# dependency EVR, 0 if they are the equal, and -1 if the installed EVR
+# is less than the dependency EVR.
 # ---------------------------------------------------------------------
 
 sub rpmevrcmp
   {
     my ($a, $b) = @_;
 
+    # The parts of an RPM version number are EPOCH:VERSION-RELEASE.
     my ($ae, $av, $ar) = ($a =~ m{^(?:([^:]*):)?([^-]*)(?:-(.*))?$});
     my ($be, $bv, $br) = ($b =~ m{^(?:([^:]*):)?([^-]*)(?:-(.*))?$});
 
@@ -344,6 +347,10 @@ sub rpmevrcmp
 
     $cmp = rpmvercmp($av, $bv);
     if ($cmp != 0) { return $cmp; }
+
+    # If the dependency release is not specified, consider any
+    # installed release to be equal.
+    if (! defined ($br)) { return 0; }
 
     return rpmvercmp($ar, $br);
 }
@@ -414,27 +421,52 @@ sub parse_depends ($$$$)
 # kernel-headers-2.2.10 [!hurd-i386], hurd-dev [hurd-i386]
 # erlang-nox (= INSTALLED)
 
-    my @pkgspecs = split /,\s*/, $depends;
-
-  SPEC:  foreach my $spec (split /,\s*/, $depends)
+  SPEC:  foreach my $spec (split(/\s*,\s*/, $depends))
       {
         my $p = undef;
         my $possible_missing = "";
-  OPTION: foreach my $option (split /\|\s*/, $spec)
+  OPTION: foreach my $option (split(/\s*\|\s*/, $spec))
           {
-            $option =~ 
-              m/^(\S+)\s*(\((<<|<=|>=|>>|<(?!=)|=|>(?!=))\s*([^\s\)]*)\))?/ or
+            my ($op, $version, $not, $restrict);
+          PARSE_OPTION: {
+              $option =~ # DEB FORMAT
+                m/^(\S+)   # package name
+                  \s*
+                  (?:      # optional version specification: "( OP VERSION )"
+                    \( \s* (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+) \s* \)
+                  )?
+                  \s*
+                  (?:      # optional architecture specification: "[ ARCH ]" or "[ ! ARCH ]"
+                    \[ \s* (!)? \s* ([^\s\!\]]+) \s* \]
+                  )?
+                  \s*$/x and do {
+                    $p = $1;
+                    $op = $2;
+                    $version = (not defined $3) ? '' : $3 eq 'INSTALLED' ? $state->{$p} : $3;
+                    $not = $4;
+                    $restrict = $5;
+                    # no warnings 'uninitialized';
+                    # print STDERR "deb $option -> $p $op $version $not $restrict\n";
+                    last PARSE_OPTION;
+                  };
+              $option =~ # RPM FORMAT
+                m/^(\S+)   # package name
+                  \s*
+                  (?:      # optional version specification: "OP VERSION"
+                    (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+)
+                  )?
+                  \s*$/x and do {
+                    $p = $1;
+                    $op = $2;
+                    $version = (not defined $3) ? '' : $3 eq 'INSTALLED' ? $state->{$p} : $3;
+                    # no warnings 'uninitialized';
+                    # print STDERR "rpm $option -> $p $op $version\n";
+                    last PARSE_OPTION;
+                  };
               die "can't parse dependencies '$depends' (option '$option')";
+            }
 
-            $p = $1;
-            my $op = $3;
-            my $rawv = defined ($4) ? $4 : "";
-            my $version = ($rawv eq "INSTALLED") ? $state->{$p} : $rawv;
-
-            if ($option =~ m/\[(!)?(.*)\]/)
-              {
-                my $not = $1;
-                my $restrict = $2;
+            if (defined $not) {
                 if ($not && $restrict eq $arch) {
                   next SPEC;
                 }

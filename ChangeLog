@@ -1,3 +1,10 @@
+Version 0.8.2
+  * Fix parsing of dependency versions that contain extra whitespace
+    inside parens or square brackets.
+  * Die on unparseable dependency specifications.
+  * Change rpmevrcmp to consider any installed version release part to
+    be equal to a missing dependency version release part.
+
 Version 0.8.1
   * getdeps was failing for C packages, make it not fail, but not work either
 
