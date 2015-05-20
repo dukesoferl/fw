@@ -455,10 +455,16 @@ sub parse_depends ($$$$)
                   (?:      # optional version specification: "OP VERSION"
                     (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+)
                   )?
+                  \s*
+                  (?:      # optional architecture specification: "[ ARCH ]" or "[ ! ARCH ]"
+                    \[ \s* (!)? \s* ([^\s\!\]]+) \s* \]
+                  )?
                   \s*$/x and do {
                     $p = $1;
                     $op = $2;
                     $version = (not defined $3) ? '' : $3 eq 'INSTALLED' ? $state->{$p} : $3;
+                    $not = $4;
+                    $restrict = $5;
                     # no warnings 'uninitialized';
                     # print STDERR "rpm $option -> $p $op $version\n";
                     last PARSE_OPTION;
