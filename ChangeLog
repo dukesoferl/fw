@@ -1,3 +1,6 @@
+Version 0.8.3
+  * rpm/make-package: Don't exclude versioned directories from RPM ownership.
+
 Version 0.8.2
   * Fix parsing of dependency versions that contain extra whitespace
     inside parens or square brackets.
