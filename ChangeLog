@@ -1,3 +1,6 @@
+Version 0.9.0
+  * added meta packages
+
 Version 0.8.3
   * rpm/make-package: Don't exclude versioned directories from RPM ownership.
 

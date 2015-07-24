@@ -43,11 +43,19 @@ make_spec_file () \
       then
         depends=""
       else
-        depends=`fw_exec "package/rpm/dependency-range"             \
-                         "$FW_PACKAGE_DEPENDS" |                    \
-                 perl -pe 's/\((\s*[<=>][^)]+)\)/ \1/g ;
-                           s/>>/>/g ;
-                           s/<</</g'`
+        if test "x$template" = "xmeta"
+          then
+            depends=`fw_exec "package/rpm/dependency-closure"           \
+                             "$arch"                                    \
+                             "$FW_PACKAGE_DEPENDS" \
+                             "$release" | perl -pe 's/\(=/= /g; s/\)//g;'`
+         else
+            depends=`fw_exec "package/rpm/dependency-range"             \
+                             "$FW_PACKAGE_DEPENDS" |                    \
+                     perl -pe 's/\((\s*[<=>][^)]+)\)/ \1/g ;
+                               s/>>/>/g ;
+                               s/<</</g'`
+         fi
       fi
 
     if test "x$depends" = x

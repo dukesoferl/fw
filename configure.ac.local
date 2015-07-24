@@ -25,6 +25,7 @@ AC_CONFIG_FILES([fw/Makefile
                  fw/template/fw-template/fw.local/template/Makefile
                  fw/template/fw-template/fw.local/template/NAME/Makefile
                  fw/template/fw-template/tests/Makefile
+                 fw/template/meta/Makefile
                  fw/template/none/Makefile
                  fw/template/script/Makefile
                  fw/template/script/bin/Makefile
