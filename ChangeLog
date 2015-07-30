@@ -1,3 +1,6 @@
+Version 0.8.4
+ * added package version requirements to rpm installing command
+
 Version 0.8.3
   * rpm/make-package: Don't exclude versioned directories from RPM ownership.
 

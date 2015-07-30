@@ -424,10 +424,12 @@ sub parse_depends ($$$$)
   SPEC:  foreach my $spec (split(/\s*,\s*/, $depends))
       {
         my $p = undef;
+        my $op = "";
+        my $version = "";
         my $possible_missing = "";
   OPTION: foreach my $option (split(/\s*\|\s*/, $spec))
           {
-            my ($op, $version, $not, $restrict);
+            my ($not, $restrict);
           PARSE_OPTION: {
               $option =~ # DEB FORMAT
                 m/^(\S+)   # package name
@@ -529,7 +531,7 @@ sub parse_depends ($$$$)
           }
         else
           {
-            push @missing, $p;
+            push @missing, "$p $op $version";
           }
         push @missing_specs, $spec;
 
