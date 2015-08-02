@@ -28,73 +28,70 @@ my @packages;
 # if getdeps is specified, attempt to use yum to install all the missing
 # dependencies.
 if ($getdeps eq "yes") {
-  my $maxtries = 10;
-  my $num_missing = 1000000;
-  my @missing = ();
+  my @missings = ();
   my @missing_specs = ();
-  if ($num_missing > 0) {
-    my ($state, undef) = get_state ();
-    # we ignore release in the case we are fetching dependencies, otherwise
-    # things stop
-    my $alldeps = parse_depends ($state, $arch, $depends, "no");
-    @packages = @{$alldeps->{"packages"}};
-    @missing = @{$alldeps->{"missing"}};
-    @missing_specs = @{$alldeps->{"missing_specs"}};
-    $num_missing = scalar @missing;
-    my %upper_bounded_packages = ();
-    my @packages_to_install;
-    # go through all missing packages, find out the upper bounded packages
-    foreach my $miss (@missing)
+  my ($state, undef) = get_state ();
+  # we ignore release in the case we are fetching dependencies, otherwise
+  # things stop
+  my $alldeps = parse_depends ($state, $arch, $depends, "no");
+  @packages = @{$alldeps->{"packages"}};
+  @missings = @{$alldeps->{"missing"}};
+  @missing_specs = @{$alldeps->{"missing_specs"}};
+  my $num_missings = scalar @missings;
+  if ($num_missings > 0) {
+    my %upper_bound_missings = ();
+    my @missings_to_install;
+    # go through all missing packages, find out the upper bound missings
+    foreach my $missing (@missings)
     {
-      my@array = split /\s+/, $miss;
+      my@array = split /\s+/, $missing;
       if (scalar @array == 3 and ($array[1] eq "<" or $array[1] eq "<=" ))
       {
-        $upper_bounded_packages{$array[0]} = 1;
+        $upper_bound_missings{$array[0]} = 1;
       }
     }
 
-    # go through all missing packages, find out the packages should be put into install command 
-    foreach my $miss (@missing)
+    # go through all missing packages, find out the missings should be put into install command 
+    foreach my $missing (@missings)
     {
-      my @array = split /\s+/, $miss;
+      my @array = split /\s+/, $missing;
       my $num = scalar @array;
       if ($num == 3) {
-        # if the package is upper bounded, do not put it into yum install command
-        if (($array[1] eq ">" or $array[1] eq ">=" or $array[1] eq "=") and not defined $upper_bounded_packages{$array[0]}) {
-          push @packages_to_install, "\"$miss\"";
+        # if the missing also has upper bound missing, do not put it into yum install command
+        if (($array[1] eq ">" or $array[1] eq ">=" or $array[1] eq "=") and not defined $upper_bound_missings{$array[0]}) {
+          push @missings_to_install, "\"$missing\"";
         } elsif ($array[1] eq "<" or $array[1] eq "<=") {
-          push @packages_to_install, "\"$miss\"";
+          push @missings_to_install, "\"$missing\"";
         } else {
-          warn "This dependency is ignored while installing: $miss\n";
+          warn "This dependency is ignored while installing: $missing\n";
         }
       } elsif ($num == 1) {
-        push @packages_to_install, "$miss";
+        push @missings_to_install, "$missing";
       } else {
-        warn "This dependency is ignored while installing: $miss\n";
+        warn "This dependency is ignored while installing: $missing\n";
       }
     }
 
-    if (scalar @packages_to_install > 0) {
-      my $cmd = "sudo yum install -y @packages_to_install";
-      warn "ATTEMPTING TO INSTALL DEPS\n\t".join ("\n\t",@packages_to_install)."\n";
+    if (scalar @missings_to_install > 0) {
+      my $cmd = "sudo yum install -y @missings_to_install";
+      warn "ATTEMPTING TO INSTALL DEPS\n\t".join ("\n\t",@missings_to_install)."\n";
       warn "$cmd\n";
       my $results = `$cmd`;
-      my $return_code = $? >> 8;
       warn "$results\n";
     }
   }
 
-  if ($num_missing > 0) {
-    my ($state, undef) = get_state ();
+  if ($num_missings > 0) {
+    ($state, undef) = get_state ();
     # we ignore release in the case we are fetching dependencies, otherwise
     # things stop
-    my $alldeps = parse_depends ($state, $arch, $depends, "no");
+    $alldeps = parse_depends ($state, $arch, $depends, "no");
     @packages = @{$alldeps->{"packages"}};
-    @missing = @{$alldeps->{"missing"}};
+    @missings = @{$alldeps->{"missing"}};
     @missing_specs = @{$alldeps->{"missing_specs"}};
-    $num_missing = scalar @missing;
+    $num_missings = scalar @missings;
   }
-  if ($num_missing > 0) {
+  if ($num_missings > 0) {
     die "UNABLE to install build deps still missing\n\t"
         .join ("\n\t",@missing_specs)."\n";
   }
