@@ -424,10 +424,11 @@ sub parse_depends ($$$$)
   SPEC:  foreach my $spec (split(/\s*,\s*/, $depends))
       {
         my $p = undef;
-        my $possible_missing = "";
+        my $op = "";
+        my $version = "";
   OPTION: foreach my $option (split(/\s*\|\s*/, $spec))
           {
-            my ($op, $version, $not, $restrict);
+            my ($not, $restrict);
           PARSE_OPTION: {
               $option =~ # DEB FORMAT
                 m/^(\S+)   # package name
@@ -497,40 +498,9 @@ sub parse_depends ($$$$)
                     next SPEC;
                   }
               }
-
-            # I want to make sure that if this is an "=" dependency that
-            # the exact version is installed, so I check here and keep
-            # track of all specified = versions (so things like
-            # pkg (= 1.0) | pkg (= 2.0) still sort of work).
-            if (defined $op and $op eq "=")
-              {
-                my $yum_version_with_epoch = undef;
-
-                # special processing needed for packages with epochs
-                if ($version =~ m#^([^:]+):(.*)$#)
-                  {
-                    $yum_version_with_epoch = $1.":".$p."-".$2.".".$arch;
-                  }
-                else
-                  {
-                    $yum_version_with_epoch = "$p-$version";
-                  }
-
-                # just concatenate all the versions and hope that yum will
-                # sort it out :)
-                $possible_missing .= $yum_version_with_epoch." ";
-              }
           }
 
-        # keep track of mising packages
-        if ($possible_missing ne "")
-          {
-            push @missing, $possible_missing;
-          }
-        else
-          {
-            push @missing, $p;
-          }
+        push @missing, "$p $op $version";
         push @missing_specs, $spec;
 
         die "package/rpm/dependency-closure: fatal: '$spec' not installed\n" 
