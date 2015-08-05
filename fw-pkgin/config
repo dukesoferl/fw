@@ -2,8 +2,8 @@
 # environment variable FW_PACKAGE_DEFAULT_MAINTAINER if non-empty
 
 FW_PACKAGE_NAME="framewerk"
-FW_PACKAGE_VERSION="0.8.3"
-FW_PACKAGE_MAINTAINER="Paul Mineiro <paul-fw@mineiro.com>"
+FW_PACKAGE_VERSION="0.9.0"
+FW_PACKAGE_MAINTAINER="Anthony Molinaro <anthonym@alumni.caltech.edu>"
 FW_PACKAGE_SHORT_DESCRIPTION="A extensible development environment."
 FW_PACKAGE_DESCRIPTION=`cat README`
 FW_PACKAGE_ARCHITECTURE_DEPENDENT="0"
@@ -22,8 +22,6 @@ FW_PACKAGE_SUGGESTS="dupload, fakeroot"
 
 FW_PACKAGE_BUILD_DEPENDS="automake | fink, autoconf | autoconf2.5 | autoconf2.6 | fink, make | fink"
 FW_PACKAGE_BUILD_CONFLICTS=""
-
-FW_SUBVERSION_TAG_ROOT="https://fwtemplates.googlecode.com/svn/tags/fw"
 
 # dupload is used for submitting debian packages to a package archive
 # The FW_DUPLOAD_ARGS field is populated with the environment variable
