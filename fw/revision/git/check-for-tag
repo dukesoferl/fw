@@ -28,6 +28,13 @@ fw_source "revision/git/check-for-tag" "sh/fatal.sh"
 fw_source "revision/git/check-for-tag" "sh/parse-args.sh"
 fw_source "revision/git/check-for-tag" "sh/validate-args.sh"
 
+check_revisions() {
+  test "$1" == "$2" || {
+    echo "revision/git/check-for-tag: fatal: tag already exists"
+    exit 1
+  }
+}
+
 #---------------------------------------------------------------------
 #                                main                                 
 #---------------------------------------------------------------------
@@ -45,9 +52,24 @@ test -z "$prog" && {
   exit 1
 }
 
-if git tag -l | grep -q "$tag"
-  then
-    exit 1
-  else
-    exit 0
-  fi
+git fetch --tags
+
+tag_rev=$(git show-ref --tags $tag | awk '{print $1}')
+
+local_tag=$(git tag -l $tag)
+test -z "$local_tag" || {
+  local_rev=$(git show-ref --tags $local_tag | awk '{print $1}')
+  test "$tag" == "$local_tag" && {
+    check_revisions "$tag_rev" "$local_rev"
+  }
+}
+
+remote_tag=$(git ls-remote --tags origin refs/tags/$tag | awk '{print $1}')
+test -z "$remote_tag" || {
+  remote_rev=$(echo $remote_tag | awk '{print $1}')
+  test "$tag" == "$remote_tag" && {
+    check_revisions "$tag_rev" "$remote_rev"
+  }
+}
+
+exit 0
