@@ -1,3 +1,7 @@
+Version 0.9.1
+ * set environment variable LC_COLLATE to use a single sort order regardless
+ * of environment
+
 Version 0.9.0
   * added meta packages
   * added package version requirements to rpm installing command
