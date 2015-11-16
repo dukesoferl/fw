@@ -2,7 +2,7 @@
 # environment variable FW_PACKAGE_DEFAULT_MAINTAINER if non-empty
 
 FW_PACKAGE_NAME="framewerk"
-FW_PACKAGE_VERSION="0.9.1"
+FW_PACKAGE_VERSION="0.9.2"
 FW_PACKAGE_MAINTAINER="Anthony Molinaro <anthonym@alumni.caltech.edu>"
 FW_PACKAGE_SHORT_DESCRIPTION="A extensible development environment."
 FW_PACKAGE_DESCRIPTION=`cat README`

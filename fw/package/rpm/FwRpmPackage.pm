@@ -80,6 +80,7 @@ sub proctalk ($$)
 sub get_state ()
   {
     my %state;
+    my %virtual; # sometimes package provide another version, this is for those
 
     proctalk (
       sub
@@ -90,10 +91,21 @@ sub get_state ()
             {
               chomp;
 
-              my ($package, $version) = split /\s+/, $_, 2;
+              my ($package, $version, $other) = split /\s+/, $_, 3;
               if ($version =~ m/^\(none\):(.*)$/)
                 {
                   $version = "$1";
+                  # providesversion is often blank, or the same version, which
+                  # can be ignored.  Otherwise it's often the version with the
+                  # hyphen release, so if removing that makes it the same
+                  # also ignore.  Otherwise it's a different version so keep
+                  # track of it in the virtual table
+                  if ($other ne ""
+                      and $other ne $version
+                      and $version =~ m/^([^\-]+)\-/
+                      and $1 ne $other) {
+                    $virtual{$package} = $other;
+                  }
                 }
               $state{$package} = $version;
             }
@@ -113,11 +125,11 @@ sub get_state ()
           exec "rpm",
                "-qa",
                '--queryformat',
-               '%-{name}\t%{epoch}:%{version}-%{release}\n';
+               '%-{name}\t%{epoch}:%{version}-%{release}\t%{provideversion}\n';
         }
     );
 
-    return (\%state, {});
+    return (\%state, \%virtual);
   }
 
 #---------------------------------------------------------------------
@@ -129,7 +141,7 @@ sub get_state ()
 
 sub get_dependencies ($$$$@)
   {
-    my ($state, undef, $arch, $release, @packages) = @_;
+    my ($state, $virtual, $arch, $release, @packages) = @_;
 
     my %dependencies;
     my %deps_by_package;
@@ -137,7 +149,7 @@ sub get_dependencies ($$$$@)
     return () unless scalar @packages;
 
     proctalk (
-      sub 
+      sub
         {
           my ($readfh, $writefh) = @_;
 
@@ -160,7 +172,8 @@ sub get_dependencies ($$$$@)
               # TODO: rpm -qR lists all sorts of wierd stuff ...
               next unless $state->{$package};
 
-              my $alldeps = parse_depends ($state, $arch, $_, $release);
+              my $depends = $_;
+              my $alldeps = parse_depends ($state, $virtual, $arch, $depends, $release);
               my @pkgs = @{$alldeps->{"packages"}};
               scalar map { $deps_by_package{$package}->{$_} = 1;
                            $dependencies{$_} = 1 }
@@ -249,7 +262,6 @@ sub reverse_provides ($$)
     my $provides = `$cmd`;
     $provides =~ m/^(\S+) / or die "unexpected rpm output for \"$cmd\": $provides";
     $reverse_provider = $1 if $state->{$1};
-
     return $reverse_provider;
   }
 
@@ -408,9 +420,9 @@ sub enforce_op ($$$)
 # satisfy the dependencies.
 #---------------------------------------------------------------------
 
-sub parse_depends ($$$$)
+sub parse_depends ($$$$$)
   {
-    my ($state, $arch, $depends, $release) = @_;
+    my ($state, $virtual, $arch, $depends, $release) = @_;
 
     my @missing;
     my @missing_specs;
@@ -476,26 +488,29 @@ sub parse_depends ($$$$)
                 }
               }
 
-            if ($state->{$p})
+            foreach my $s ($state, $virtual)
               {
-                if (enforce_op ($op, $state->{$p}, $version))
+                if ($s->{$p})
                   {
-                    $packages{$p} = 
-                      (defined ($op) && $op ne "") ? "$op $version"
-                                                   : ">= $state->{$p}";
-                    next SPEC;
+                    if (enforce_op ($op, $s->{$p}, $version))
+                      {
+                        $packages{$p} =
+                          (defined ($op) && $op ne "") ? "$op $version"
+                                                       : ">= $s->{$p}";
+                        next SPEC;
+                      }
                   }
-              }
-            else
-              {
-                my $rev_p = reverse_provides ($state, $p);
-
-                if ($rev_p && enforce_op ($op, $state->{$rev_p}, $version))
+                else
                   {
-                    $packages{$rev_p} =
-                      (defined ($op) && $op ne "") ? "$op $version"
-                                                   : ">= $state->{$rev_p}";
-                    next SPEC;
+                    my $rev_p = reverse_provides ($s, $p);
+
+                    if ($rev_p && enforce_op ($op, $s->{$rev_p}, $version))
+                      {
+                        $packages{$rev_p} =
+                          (defined ($op) && $op ne "") ? "$op $version"
+                                                       : ">= $s->{$rev_p}";
+                        next SPEC;
+                      }
                   }
               }
           }

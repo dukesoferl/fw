@@ -30,10 +30,10 @@ my @packages;
 if ($getdeps eq "yes") {
   my @missings = ();
   my @missing_specs = ();
-  my ($state, undef) = get_state ();
+  my ($state, $virtual) = get_state ();
   # we ignore release in the case we are fetching dependencies, otherwise
   # things stop
-  my $alldeps = parse_depends ($state, $arch, $depends, "no");
+  my $alldeps = parse_depends ($state, $virtual, $arch, $depends, "no");
   @packages = @{$alldeps->{"packages"}};
   @missings = @{$alldeps->{"missing"}};
   @missing_specs = @{$alldeps->{"missing_specs"}};
@@ -82,10 +82,10 @@ if ($getdeps eq "yes") {
   }
 
   if ($num_missings > 0) {
-    ($state, undef) = get_state ();
+    ($state, $virtual) = get_state ();
     # we ignore release in the case we are fetching dependencies, otherwise
     # things stop
-    $alldeps = parse_depends ($state, $arch, $depends, "no");
+    $alldeps = parse_depends ($state, $virtual, $arch, $depends, "no");
     @packages = @{$alldeps->{"packages"}};
     @missings = @{$alldeps->{"missing"}};
     @missing_specs = @{$alldeps->{"missing_specs"}};
@@ -96,8 +96,8 @@ if ($getdeps eq "yes") {
         .join ("\n\t",@missing_specs)."\n";
   }
 } else {
-  my ($state, undef) = get_state ();
-  my $alldeps = parse_depends ($state, $arch, $depends, $release);
+  my ($state, $virtual) = get_state ();
+  my $alldeps = parse_depends ($state, $virtual, $arch, $depends, $release);
   @packages = @{$alldeps->{"packages"}};
 }
 
