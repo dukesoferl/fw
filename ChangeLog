@@ -1,3 +1,7 @@
+Version 0.9.2
+  * dependency closure was failing if a package provides 2 versions, so now
+  keep track of the second version and have closure check both.
+
 Version 0.9.1
   * set environment variable LC_COLLATE to use a single sort order regardless
     of environment

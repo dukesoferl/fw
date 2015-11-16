@@ -21,10 +21,10 @@ my $release = $ARGV[2] or die $usage;
 
 my ($state, $virtual) = get_state ();
 
-my $alldeps = parse_depends ($state, $arch, $depends, $release);
+my $alldeps = parse_depends ($state, $virtual, $arch, $depends, $release);
 my @packages = @{$alldeps->{"packages"}};
 
-my @closure = 
+my @closure =
   get_dependencies_closure ($state, $virtual, $arch, $release, @packages);
 
 if (scalar grep { $state->{$_} =~ /-TEST1$/ } @closure)
