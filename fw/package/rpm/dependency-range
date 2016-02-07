@@ -29,25 +29,58 @@ sub parse_depends_range ($$)
 # libc6 (>= 2.2.1), exim | mail-transport-agent
 # erlang (= INSTALLED)
 
-    my @pkgspecs = split /,\s*/, $depends;
+    my @pkgspecs = split /\s*,\s*/, $depends;
 
     my $firstspec = 1;
-  SPEC:  foreach my $spec (split /,\s*/, $depends)
+  SPEC:  foreach my $spec (split /\s*,\s*/, $depends)
       {
         print ", " unless $firstspec;
         $firstspec = 0;
 
-  OPTION: foreach my $option (split /\|\s*/, $spec)
+        my $p = undef;
+        my $op = "";
+        my $version = "";
+  OPTION: foreach my $option (split /\s*\|\s*/, $spec)
           {
-            $option =~ m/^(\S+)\s*(\(\s*(<<|<|<=|=|>=|>>)\s*([^\)]+)\))?/ or
-              die "can't parse dependencies '$depends' (option '$option')\n";
-
-            my $p = $1;
-            my $op = $3;
-            my $rawv = defined ($4) ? $4 : "";
-            my $version = ($rawv eq "INSTALLED") ? $state->{$p} : $rawv;
-
-#            next OPTION unless exists $state->{$p};
+            my ($not, $restrict);
+          PARSE_OPTION: {
+              $option =~ # DEB FORMAT
+                m/^\s*(\S+)   # package name
+                  \s*
+                  (?:      # optional version specification: "( OP VERSION )"
+                    \( \s* (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+) \s* \)
+                  )?
+                  \s*
+                  (?:      # optional architecture specification: "[ ARCH ]" or "[ ! ARCH ]"
+                    \[ \s* (!)? \s* ([^\s\!\]]+) \s* \]
+                  )?
+                  \s*$/x and do {
+                    $p = $1;
+                    $op = $2;
+                    $version = (not defined $3) ? '' : $3 eq 'INSTALLED' ? $state->{$p} : $3;
+                    $not = $4;
+                    $restrict = $5;
+#                    no warnings 'uninitialized';
+#                    print STDERR "deb $option -> $p $op $version $not $restrict\n";
+                    last PARSE_OPTION;
+                  };
+              $option =~ # RPM FORMAT
+                m/^\s*(\S+)   # package name
+                  \s*
+                  (?:      # optional version specification: "OP VERSION"
+                    (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+)
+                  )?
+                  \s*$/x and do {
+                    $p = $1;
+                    $op = $2;
+                    $version = (not defined $3) ? '' : $3 eq 'INSTALLED' ? $state->{$p} : $3;
+#                    no warnings 'uninitialized';
+#                    print STDERR "rpm $option -> $p $op $version\n";
+                    last PARSE_OPTION;
+                  };
+              die "can't parse dependencies '$depends' (option '$option')";
+            }
+ #            next OPTION unless exists $state->{$p};
 
             if (   defined ($op) && $op ne "" 
                 && defined ($version) && $version ne "")
@@ -65,10 +98,6 @@ sub parse_depends_range ($$)
                 elsif (my $rev_p = reverse_provides ($state, $p))
                   {
                     print "$rev_p (>= $state->{$rev_p})";
-                  }
-                elsif ($rawv eq "INSTALLED")
-                  {
-                    print $p;
                   }
                 else
                   {
