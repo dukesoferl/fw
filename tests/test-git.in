@@ -1,7 +1,16 @@
 #! /bin/sh
+set -x
 
 PATH="`pwd`/../bin:$PATH"
 export PATH
+
+git=`which git`
+
+if test -z "$git"
+  then
+    echo "error: can't find git, tests will not work!" 1>&2
+    exit 77
+  fi
 
 # fix for newer automake which doesn't seem to work well when called
 # recursively.
@@ -14,23 +23,27 @@ export PATH
 # so this fixes that by zeroing out the TEST_LOGS
 MAKEFLAGS=`echo "$MAKEFLAGS" | perl -pe 's/TEST_LOGS=([^=]*)/TEST_LOGS=/'`
 export MAKEFLAGS
+
 (
 set -x
 test -h share || ln -sf .. share || exit 1
-rm -rf tmp 
-FW_ROOT=`pwd` fw-init --name tmp                              \
-                      --revision none                         \
-                      --localize 1                            \
-                      --template none                         || exit 1
+rm -rf tmp
+FW_ROOT=`pwd`
+export FW_ROOT
+fw-init --name tmp                                    \
+        --revision git                                \
+        --template script || exit 1
 cd tmp
-test -h fw.local || ln -sf ../fw.local fw.local || exit 1
+( git status | grep '^# Untracked files:' ) && exit 1
 ./bootstrap || exit 1
+( git status | grep '^# Untracked files:' ) && exit 1
 ./build || exit 1
 "@GMAKE@" -s check || exit 1
-
+( git status | grep '^# Untracked files:' ) && exit 1
 "@GMAKE@" -s maintainer-clean
-test -z "`find . -name '*.am' -and -not -path './fw.local/*'`" || exit 1
-) > test-template-none.out 2>&1 || exit 1
+( git status | grep '^# Untracked files:' ) && exit 1
+test -z "`find . -name '*.am'`" || exit 1
+) > test-git.out 2>&1 || exit 1
 
-rm share
-rm -rf tmp
+rm -rf tmp || exit 1
+rm share || exit 1

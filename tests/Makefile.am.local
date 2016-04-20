@@ -21,17 +21,25 @@ CLEANFILES += 				\
   test-template-none.out		\
   test-cvs.out				\
   test-svn.out \
-  test-git.out
+  test-git.out \
+  test-canonicalize-package.out \
+  test-canonicalize-version.out
 
 MAINTAINERCLEANFILES += 		\
   share					\
   test-template-fw-build		\
   test-template-fw-template		\
   test-template-script	\
-  test-template-none
+  test-template-none \
+  test-cvs \
+  test-svn \
+  test-git
 
 maintainer-clean-local:
 	rm -rf tmp
+	rm -rf svntmp
+	rm -rf cvstmp
+	rm -f *.log *.trs
 
 EXTRA_DIST +=				\
   $(check_SCRIPTS)

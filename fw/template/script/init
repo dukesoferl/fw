@@ -66,13 +66,15 @@ for dir in bin tests
 
     (
       cd "$dir" &&                                              \
-      fw_exec "revision/$revision/add-files"			\
-	Makefile.am.local					\
-	myscript						\
-	testmyscript &&						\
+      fw_exec "revision/$revision/add-files" \
+        Makefile.am.local \
+        myscript \
+        testmyscript && \
       fw_exec "revision/$revision/ignore-files"                 \
         Makefile                                                \
         Makefile.in                                             \
+        '*.log'                                                 \
+        '*.trs'                                                 \
         '.*.script_ok'                                          \
     ) || fatal "script/init"
   done

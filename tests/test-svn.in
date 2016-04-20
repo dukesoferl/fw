@@ -49,9 +49,9 @@ cd tmp
 ./bootstrap || exit 1
 ( svn status | grep '^?' ) && exit 1
 ./build || exit 1
-"/usr/bin/gmake" -s check || exit 1
+"@GMAKE@" -s check || exit 1
 ( svn status | grep '^?' ) && exit 1
-"/usr/bin/gmake" -s maintainer-clean
+"@GMAKE@" -s maintainer-clean
 ( svn status | grep '^?' ) && exit 1
 test -z "`find . -name '*.am'`" || exit 1
 ) > test-svn.out 2>&1 || exit 1
