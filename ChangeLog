@@ -1,3 +1,6 @@
+Version 0.9.5
+  * another attempt at fixing the gcc/libtool dependency closure issues
+
 Version 0.9.4
   * minor fixups to work with Centos7 and the automake version it includes
 
