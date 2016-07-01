@@ -45,9 +45,18 @@ test -z "$prog" && {
   exit 1
 }
 
+check_revisions() {
+  test "$1" == "$2" || {
+    echo "revision/git/check-for-tag: fatal: tag already exists"
+    exit 1
+  }
+}
+
 if git tag -l | grep -q "$tag"
   then
-    exit 1
-  else
-    exit 0
-  fi
+    tag_revision=$(git rev-list -n 1 $tag)
+    head_revision=$(git rev-list -n 1 HEAD)
+    check_revisions $tag_revision $head_revision
+fi
+
+exit 0
