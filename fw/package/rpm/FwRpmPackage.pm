@@ -95,6 +95,30 @@ sub get_state ()
               if ($version =~ m/^\(none\):(.*)$/)
                 {
                   $version = "$1";
+
+                  # gcc and libtool seem to have odd stuff going on under
+                  # Centos6 and Centos7, they sometimes provide a second
+                  # version, for instance in Centos6 gcc provides 2 versions
+                  # but the second version is available in providesversion,
+                  # for Centos7 gcc provides 2 versions, but the second is
+                  # not available in providesversion, but only when
+                  # rpm -q -provides gcc is called, so I decided to hack
+                  # this in here.  It will work with any package which
+                  # doesn't have a provides, and will see if any others
+                  # exist.
+                  if ($other eq "") {
+                    my $p = `rpm -q --provides $package`;
+                    my @l = split /\n/, $p;
+                    foreach my $l (@l) {
+                      if ($l =~ /^$package = (.*)$/) {
+                        if ($1 ne $version)
+                          {
+                            $other = $1;
+                          }
+                      }
+                    }
+                  }
+
                   # providesversion is often blank, or the same version, which
                   # can be ignored.  Otherwise it's often the version with the
                   # hyphen release, so if removing that makes it the same

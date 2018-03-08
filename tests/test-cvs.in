@@ -24,6 +24,19 @@ FW_ROOT=`pwd`
 export FW_ROOT
 CVSROOT="`pwd`/cvstmp"
 export CVSROOT
+
+# fix for newer automake which doesn't seem to work well when called
+# recursively.
+# what was happening is that the TEST_LOGS at the top level were sent
+# to sub-levels and caused errors like
+#
+# fatal: making test-suite.log: failed to create test-canonicalize-package.trs
+# fatal: making test-suite.log: failed to create test-canonicalize-package.log
+#
+# so this fixes that by zeroing out the TEST_LOGS
+MAKEFLAGS=`echo "$MAKEFLAGS" | perl -pe 's/TEST_LOGS=([^=]*)/TEST_LOGS=/'`
+export MAKEFLAGS
+
 rm -rf megatmp
 (
   mkdir megatmp &&

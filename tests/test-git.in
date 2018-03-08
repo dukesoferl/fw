@@ -1,19 +1,8 @@
 #! /bin/sh
+set -x
 
 PATH="`pwd`/../bin:$PATH"
 export PATH
-
-if test -z "$MAKE"
-  then
-    gmake=`which gmake`
-
-    if test $? = 0 
-      then
-        MAKE=gmake
-      else
-        MAKE=make
-      fi
-  fi
 
 git=`which git`
 
@@ -22,6 +11,18 @@ if test -z "$git"
     echo "error: can't find git, tests will not work!" 1>&2
     exit 77
   fi
+
+# fix for newer automake which doesn't seem to work well when called
+# recursively.
+# what was happening is that the TEST_LOGS at the top level were sent
+# to sub-levels and caused errors like
+#
+# fatal: making test-suite.log: failed to create test-canonicalize-package.trs
+# fatal: making test-suite.log: failed to create test-canonicalize-package.log
+#
+# so this fixes that by zeroing out the TEST_LOGS
+MAKEFLAGS=`echo "$MAKEFLAGS" | perl -pe 's/TEST_LOGS=([^=]*)/TEST_LOGS=/'`
+export MAKEFLAGS
 
 (
 set -x
@@ -37,9 +38,9 @@ cd tmp
 ./bootstrap || exit 1
 ( git status | grep '^# Untracked files:' ) && exit 1
 ./build || exit 1
-"$MAKE" -s check || exit 1
+"@GMAKE@" -s check || exit 1
 ( git status | grep '^# Untracked files:' ) && exit 1
-"$MAKE" -s maintainer-clean
+"@GMAKE@" -s maintainer-clean
 ( git status | grep '^# Untracked files:' ) && exit 1
 test -z "`find . -name '*.am'`" || exit 1
 ) > test-git.out 2>&1 || exit 1

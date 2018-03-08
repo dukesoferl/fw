@@ -78,6 +78,7 @@ fw_exec "revision/$revision/ignore-files"       \
   fw-pkgtmp                                     \
   missing                                       \
   install-sh                                    \
+  test-driver \
 || fatal "automake/init"
 
 (

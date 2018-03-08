@@ -32,6 +32,8 @@ make_spec_file () \
     local depends
     local dependstag
     local hookdir
+    local obsoletes
+    local obsoletestag
     local postinst
     local postremove
     local preinst
@@ -74,6 +76,17 @@ make_spec_file () \
         conflictstag="#Conflicts:"
       else
         conflictstag="Conflicts: $conflicts"
+      fi
+
+    obsoletes=`perl -le '$ARGV[0] =~ s/\((\s*[<=>][^)]+)\)/ \1/g ; $ARGV[0] =~ s/>>/>/g; $ARGV[0] =~ s/<</</g ; $ARGV[0] =~ s/\s\s/ /g; $ARGV[0] =~ s/,(\S)/, \1/g; print $ARGV[0]' "$FW_PACKAGE_REPLACES"`
+
+    test $? -eq 0 || fatal "package/rpm/make-package"
+
+    if test "x$obsoletes" = x
+      then
+        obsoletestag="#Obsoletes:"
+      else
+        obsoletestag="Obsoletes: $obsoletes"
       fi
 
     provides=`perl -le '$ARGV[0] =~ s/\((\s*[<=>][^)]+)\)/ \1/g ; $ARGV[0] =~ s/>>/>/g; $ARGV[0] =~ s/<</</g ; $ARGV[0] =~ s/\s\s/ /g; $ARGV[0] =~ s/,(\S)/, \1/g; print $ARGV[0]' "$FW_PACKAGE_PROVIDES"`
@@ -174,6 +187,7 @@ $vendortag
 $packagertag
 $dependstag
 $conflictstag
+$obsoletestag
 $providestag
 
 %description

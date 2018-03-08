@@ -1,3 +1,16 @@
+Version 0.9.7
+  * use FW_PACKAGE_REPLACES as a config variable that allow
+  to set Obsoletes option to RPM
+
+Version 0.9.6
+  * compare revision of the tag with HEAD to decide a existing tag
+
+Version 0.9.5
+  * another attempt at fixing the gcc/libtool dependency closure issues
+
+Version 0.9.4
+  * minor fixups to work with Centos7 and the automake version it includes
+
 Version 0.9.3
   * dependency-range has deviated from dependency closure and was causing
   certain packages to fail to build

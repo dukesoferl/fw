@@ -3,3 +3,6 @@ test: check
 SUBDIRS += fw fw.local
 
 CLEANFILES += $(wildcard testmak.*)
+
+maintainer-clean-local::
+	rm -f test-driver
