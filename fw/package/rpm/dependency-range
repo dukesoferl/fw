@@ -29,8 +29,6 @@ sub parse_depends_range ($$)
 # libc6 (>= 2.2.1), exim | mail-transport-agent
 # erlang (= INSTALLED)
 
-    my @pkgspecs = split /\s*,\s*/, $depends;
-
     my $firstspec = 1;
   SPEC:  foreach my $spec (split /\s*,\s*/, $depends)
       {
@@ -45,7 +43,7 @@ sub parse_depends_range ($$)
             my ($not, $restrict);
           PARSE_OPTION: {
               $option =~ # DEB FORMAT
-                m/^\s*(\S+)   # package name
+                m/^(\S+)   # package name
                   \s*
                   (?:      # optional version specification: "( OP VERSION )"
                     \( \s* (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+) \s* \)
@@ -65,7 +63,7 @@ sub parse_depends_range ($$)
                     last PARSE_OPTION;
                   };
               $option =~ # RPM FORMAT
-                m/^\s*(\S+)   # package name
+                m/^(\S+)   # package name
                   \s*
                   (?:      # optional version specification: "OP VERSION"
                     (<<|<=|>=|>>|<(?!=)|=|>(?!=)) \s* ([^\s\)]+)
