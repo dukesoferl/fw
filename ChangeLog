@@ -1,3 +1,6 @@
+Version 0.9.8
+  * somehow dependency-range fixes from 0.9.3 went away, this puts them back
+
 Version 0.9.7
   * use FW_PACKAGE_REPLACES as a config variable that allow
   to set Obsoletes option to RPM
